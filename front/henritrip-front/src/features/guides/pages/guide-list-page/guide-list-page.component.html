@@ -1,0 +1,60 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1>Mes guides</h1>
+      <p>Consultez les guides créés ou partagés avec vous.</p>
+    </div>
+
+    <button type="button" class="btn secondary" (click)="loadGuides()">
+      Actualiser
+    </button>
+  </header>
+
+  <form class="search-bar" (submit)="$event.preventDefault()">
+    <input
+      type="text"
+      [ngModel]="searchTerm"
+      (ngModelChange)="onSearchInput($event)"
+      name="guideSearch"
+      autocomplete="off"
+      spellcheck="false"
+      placeholder="Rechercher un guide, une destination..."
+    />
+    <button *ngIf="searchTerm" type="button" class="btn ghost" (click)="clearSearch()">
+      Effacer
+    </button>
+  </form>
+
+  <div *ngIf="loading" class="state">Chargement des guides...</div>
+
+  <div *ngIf="!loading && errorMessage" class="state error">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="!loading && !errorMessage && !filteredGuides.length" class="state">
+    Aucun guide trouvé.
+  </div>
+
+  <div *ngIf="!loading && filteredGuides.length" class="grid">
+    <a
+      class="card"
+      *ngFor="let guide of filteredGuides; trackBy: trackByGuideId"
+      [routerLink]="['/guides', guide.id]"
+    >
+      <div class="cover" [class.placeholder]="!guide.coverImageUrl">
+        <img *ngIf="guide.coverImageUrl" [src]="guide.coverImageUrl" [alt]="guide.title" />
+        <span *ngIf="!guide.coverImageUrl">Guide</span>
+      </div>
+
+      <div class="card-body">
+        <h2>{{ guide.title }}</h2>
+        <p class="destination" *ngIf="guide.destination">{{ guide.destination }}</p>
+        <p class="description">{{ guide.description }}</p>
+
+        <div class="meta">
+          <span>{{ guide.daysCount ?? 0 }} jour(s)</span>
+        </div>
+      </div>
+    </a>
+  </div>
+</section>

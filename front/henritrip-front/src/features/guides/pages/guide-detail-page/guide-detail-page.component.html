@@ -1,0 +1,74 @@
+<section class="page">
+  <div class="top-actions">
+    <a routerLink="/guides" class="back-link">← Retour aux guides</a>
+  </div>
+
+  <div *ngIf="loading" class="state">Chargement du guide...</div>
+
+  <div *ngIf="!loading && errorMessage" class="state error">
+    {{ errorMessage }}
+  </div>
+
+  <ng-container *ngIf="!loading && guide as g">
+    <header class="hero">
+      <div class="hero-cover" [class.placeholder]="!g.coverImageUrl">
+        <img *ngIf="g.coverImageUrl" [src]="g.coverImageUrl" [alt]="g.title" />
+        <span *ngIf="!g.coverImageUrl">Guide</span>
+      </div>
+
+      <div class="hero-content">
+        <h1>{{ g.title }}</h1>
+        <p class="destination" *ngIf="g.destination">{{ g.destination }}</p>
+        <p class="description">{{ g.description }}</p>
+        <div class="meta">
+          <span>{{ g.days.length }} jour(s)</span>
+        </div>
+      </div>
+    </header>
+
+    <section class="days-section" *ngIf="g.days.length; else noDays">
+      <div class="days-nav" role="tablist" aria-label="Jours du guide">
+        <button
+          type="button"
+          class="day-pill"
+          *ngFor="let day of g.days; trackBy: trackByDayId"
+          [class.active]="selectedDayId === day.id"
+          (click)="selectDay(day)"
+        >
+          Jour {{ day.dayNumber }}
+        </button>
+      </div>
+
+      <div class="day-content" *ngIf="selectedDay as day">
+        <div class="day-header">
+          <h2>Jour {{ day.dayNumber }} · {{ day.title }}</h2>
+          <p *ngIf="day.date">{{ day.date }}</p>
+        </div>
+
+        <div *ngIf="!day.activities.length" class="state">
+          Aucune activité pour ce jour.
+        </div>
+
+        <ul *ngIf="day.activities.length" class="activities">
+          <li *ngFor="let activity of day.activities; trackBy: trackByActivityId" class="activity-card">
+            <div class="activity-main">
+              <h3>{{ activity.title }}</h3>
+              <p *ngIf="activity.description">{{ activity.description }}</p>
+            </div>
+
+            <div class="activity-meta">
+              <span *ngIf="activity.startTime || activity.endTime">
+                {{ activity.startTime || '--:--' }} - {{ activity.endTime || '--:--' }}
+              </span>
+              <span *ngIf="activity.location">{{ activity.location }}</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <ng-template #noDays>
+      <div class="state">Ce guide ne contient pas encore de jours.</div>
+    </ng-template>
+  </ng-container>
+</section>
