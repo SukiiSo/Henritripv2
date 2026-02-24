@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("HenriTrip.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+856001c30d5251d8965bea9e558d95684c8d1e01")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+749765025a5079eb3c20c2542d5d61b64b788236")]
 [assembly: System.Reflection.AssemblyProductAttribute("HenriTrip.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("HenriTrip.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
