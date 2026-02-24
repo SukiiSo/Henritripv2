@@ -28,15 +28,56 @@ export class GuideListPageComponent implements OnInit, OnDestroy {
   loading = false
   errorMessage = ''
   searchTerm = ''
+  isOffline = false
+
+  // FILTRES
+  showFilters = false
+  selectedSeason = ''
+  selectedMobility = ''
+  selectedForWho = ''
+  minDaysCount: number | null = null
+
+  seasonOptions: string[] = []
+  mobilityOptions: string[] = []
+  forWhoOptions: string[] = []
 
   private get isBrowser(): boolean {
     return isPlatformBrowser(this.platformId)
+  }
+
+  get activeFiltersCount(): number {
+    let count = 0
+    if (this.selectedSeason) count++
+    if (this.selectedMobility) count++
+    if (this.selectedForWho) count++
+    if (this.minDaysCount !== null) count++
+    return count
+  }
+
+  private handleOnline = (): void => {
+    this.isOffline = false
+    this.errorMessage = ''
+    this.loadGuides()
+    this.cdr.detectChanges()
+  }
+
+  private handleOffline = (): void => {
+    this.isOffline = true
+    if (!this.errorMessage) {
+      this.errorMessage = 'Mode hors ligne. Affichage des données en cache si disponibles.'
+    }
+    this.cdr.detectChanges()
   }
 
   ngOnInit(): void {
     if (!this.isBrowser) {
       return
     }
+
+    this.isOffline = !navigator.onLine
+
+    window.addEventListener('online', this.handleOnline)
+    window.addEventListener('offline', this.handleOffline)
 
     this.loadGuides()
 
@@ -53,13 +94,20 @@ export class GuideListPageComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    if (this.isBrowser) {
+      window.removeEventListener('online', this.handleOnline)
+      window.removeEventListener('offline', this.handleOffline)
+    }
+
     this.destroy$.next()
     this.destroy$.complete()
   }
 
   loadGuides(): void {
     this.loading = true
-    this.errorMessage = ''
+    this.errorMessage = this.isOffline
+      ? 'Mode hors ligne. Affichage des données en cache si disponibles.'
+      : ''
 
     this.guidesService.getGuides()
       .pipe(
@@ -72,14 +120,17 @@ export class GuideListPageComponent implements OnInit, OnDestroy {
       )
       .subscribe({
         next: (data: Guide[]) => {
-          console.log('GUIDES OK', data)
-
           this.guides = data ?? []
+          this.buildFilterOptions()
           this.applyFilter()
+
+          this.isOffline = false
+          this.errorMessage = ''
 
           if (this.isBrowser) {
             try {
               localStorage.setItem('guides_cache', JSON.stringify(this.guides))
+              localStorage.setItem('guides_cache_updated_at', new Date().toISOString())
             } catch (e) {
               console.warn('Cache localStorage impossible', e)
             }
@@ -96,8 +147,12 @@ export class GuideListPageComponent implements OnInit, OnDestroy {
 
               if (cached) {
                 this.guides = JSON.parse(cached) as Guide[]
+                this.buildFilterOptions()
                 this.applyFilter()
-                this.errorMessage = 'API indisponible. Données locales affichées.'
+
+                const offlineMsg = this.isOffline ? 'Mode hors ligne.' : 'API indisponible.'
+                this.errorMessage = `${offlineMsg} Données locales affichées.`
+
                 this.cdr.detectChanges()
                 return
               }
@@ -108,7 +163,14 @@ export class GuideListPageComponent implements OnInit, OnDestroy {
 
           this.guides = []
           this.filteredGuides = []
-          this.errorMessage = 'Impossible de charger les guides.'
+          this.seasonOptions = []
+          this.mobilityOptions = []
+          this.forWhoOptions = []
+
+          this.errorMessage = this.isOffline
+            ? 'Mode hors ligne et aucun cache disponible.'
+            : 'Impossible de charger les guides.'
+
           this.cdr.detectChanges()
         }
       })
@@ -125,22 +187,65 @@ export class GuideListPageComponent implements OnInit, OnDestroy {
     this.cdr.detectChanges()
   }
 
+  toggleFilters(): void {
+    this.showFilters = !this.showFilters
+  }
+
+  onFilterChange(): void {
+    this.applyFilter()
+    this.cdr.detectChanges()
+  }
+
+  resetFilters(): void {
+    this.selectedSeason = ''
+    this.selectedMobility = ''
+    this.selectedForWho = ''
+    this.minDaysCount = null
+    this.applyFilter()
+    this.cdr.detectChanges()
+  }
+
   trackByGuideId(index: number, guide: Guide): number {
     return guide.id
+  }
+
+  private buildFilterOptions(): void {
+    this.seasonOptions = [...new Set(
+      this.guides
+        .map(g => g.season)
+        .filter((v): v is string => !!v && v.trim().length > 0)
+    )].sort()
+
+    this.mobilityOptions = [...new Set(
+      this.guides
+        .map(g => g.mobility)
+        .filter((v): v is string => !!v && v.trim().length > 0)
+    )].sort()
+
+    this.forWhoOptions = [...new Set(
+      this.guides
+        .map(g => g.forWho)
+        .filter((v): v is string => !!v && v.trim().length > 0)
+    )].sort()
   }
 
   private applyFilter(): void {
     const q = this.searchTerm.trim().toLowerCase()
 
-    if (!q) {
-      this.filteredGuides = [...this.guides]
-      return
-    }
+    this.filteredGuides = this.guides.filter(g => {
+      const matchesSearch = !q || (
+        g.title.toLowerCase().includes(q) ||
+        (g.destination ?? '').toLowerCase().includes(q) ||
+        g.description.toLowerCase().includes(q)
+      )
 
-    this.filteredGuides = this.guides.filter(g =>
-      g.title.toLowerCase().includes(q) ||
-      (g.destination ?? '').toLowerCase().includes(q) ||
-      g.description.toLowerCase().includes(q)
-    )
+      const matchesSeason = !this.selectedSeason || g.season === this.selectedSeason
+      const matchesMobility = !this.selectedMobility || g.mobility === this.selectedMobility
+      const matchesForWho = !this.selectedForWho || g.forWho === this.selectedForWho
+      const matchesDays =
+        this.minDaysCount === null || (g.daysCount ?? 0) >= this.minDaysCount
+
+      return matchesSearch && matchesSeason && matchesMobility && matchesForWho && matchesDays
+    })
   }
 }

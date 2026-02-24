@@ -1,8 +1,11 @@
 <section class="page">
   <header class="page-header">
-    <div>
-      <h1>Mes guides</h1>
-      <p>Consultez les guides créés ou partagés avec vous.</p>
+    <div class="header-left">
+      <img src="/logo.png" alt="Henri Trip" class="brand-logo" />
+      <div>
+        <h1>Mes guides</h1>
+        <p>Consultez les guides créés ou partagés avec vous.</p>
+      </div>
     </div>
 
     <button type="button" class="btn secondary" (click)="loadGuides()">
@@ -20,10 +23,97 @@
       spellcheck="false"
       placeholder="Rechercher un guide, une destination..."
     />
+
     <button *ngIf="searchTerm" type="button" class="btn ghost" (click)="clearSearch()">
       Effacer
     </button>
   </form>
+
+  <div class="toolbar-row">
+    <button type="button" class="btn secondary" (click)="toggleFilters()">
+      {{ showFilters ? 'Masquer les filtres' : 'Afficher les filtres' }}
+      <span *ngIf="activeFiltersCount > 0">({{ activeFiltersCount }})</span>
+    </button>
+
+    <button
+      *ngIf="activeFiltersCount > 0"
+      type="button"
+      class="btn ghost"
+      (click)="resetFilters()"
+    >
+      Réinitialiser les filtres
+    </button>
+  </div>
+
+  <section *ngIf="showFilters" class="filters-panel">
+    <div class="filter-grid">
+      <div class="filter-field">
+        <label for="seasonFilter">Saison</label>
+        <select
+          id="seasonFilter"
+          [(ngModel)]="selectedSeason"
+          name="seasonFilter"
+          (ngModelChange)="onFilterChange()"
+        >
+          <option value="">Toutes</option>
+          <option *ngFor="let season of seasonOptions" [value]="season">
+            {{ season }}
+          </option>
+        </select>
+      </div>
+
+      <div class="filter-field">
+        <label for="mobilityFilter">Mobilité</label>
+        <select
+          id="mobilityFilter"
+          [(ngModel)]="selectedMobility"
+          name="mobilityFilter"
+          (ngModelChange)="onFilterChange()"
+        >
+          <option value="">Toutes</option>
+          <option *ngFor="let mobility of mobilityOptions" [value]="mobility">
+            {{ mobility }}
+          </option>
+        </select>
+      </div>
+
+      <div class="filter-field">
+        <label for="forWhoFilter">Pour qui</label>
+        <select
+          id="forWhoFilter"
+          [(ngModel)]="selectedForWho"
+          name="forWhoFilter"
+          (ngModelChange)="onFilterChange()"
+        >
+          <option value="">Tous</option>
+          <option *ngFor="let target of forWhoOptions" [value]="target">
+            {{ target }}
+          </option>
+        </select>
+      </div>
+
+      <div class="filter-field">
+        <label for="daysFilter">Nb jours minimum</label>
+        <select
+          id="daysFilter"
+          [ngModel]="minDaysCount"
+          name="daysFilter"
+          (ngModelChange)="minDaysCount = $event === '' ? null : +$event; onFilterChange()"
+        >
+          <option value="">Tous</option>
+          <option [value]="1">1+</option>
+          <option [value]="2">2+</option>
+          <option [value]="3">3+</option>
+          <option [value]="4">4+</option>
+          <option [value]="5">5+</option>
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <div *ngIf="isOffline" class="state error">
+    Mode hors ligne. Synchronisation automatique au retour de la connexion.
+  </div>
 
   <div *ngIf="loading" class="state">Chargement des guides...</div>
 

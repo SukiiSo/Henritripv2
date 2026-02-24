@@ -1,6 +1,11 @@
 <section class="guide-detail-page">
-  <a class="back-link" routerLink="/guides">← Retour aux guides</a>
+ <a class="back-link" routerLink="/guides" aria-label="Retour aux guides">
+  <span class="back-link-icon">←</span>
+  <span>Retour aux guides</span>
+</a>
+<div class="detail-brand">
 
+</div>
   <div *ngIf="loading" class="state">Chargement du guide...</div>
 
   <div *ngIf="!loading && errorMessage" class="state error">
@@ -20,7 +25,7 @@
         <p class="hero-description">{{ g.description }}</p>
 
         <div class="chips">
-          <span>{{ g.daysCount ?? g.days?.length ?? 0 }} jour(s)</span>
+          <span>{{ g.daysCount ?? g.days.length }} jour(s)</span>
           <span *ngIf="g.mobility">Mobilité: {{ g.mobility }}</span>
           <span *ngIf="g.season">Saison: {{ g.season }}</span>
           <span *ngIf="g.forWho">Pour: {{ g.forWho }}</span>
@@ -28,7 +33,7 @@
       </div>
     </header>
 
-    <section class="days-section" *ngIf="g.days?.length; else noDays">
+   <section class="days-section" *ngIf="g.days.length; else noDays">
       <h2>Jours du guide</h2>
 
       <div class="days-tabs">
@@ -44,7 +49,7 @@
         </button>
       </div>
 
-      <div class="day-panel" *ngIf="selectedDay as day">
+      <div class="day-panel" *ngIf="selectedDay as day" [attr.data-day-id]="day.id">
         <div class="day-panel-header">
           <div>
             <h3>Jour {{ day.dayNumber }} · {{ day.title }}</h3>
@@ -52,7 +57,7 @@
           </div>
         </div>
 
-        <div *ngIf="day.activities?.length; else noActivities" class="activities-list">
+        <div *ngIf="day.activities.length; else noActivities" class="activities-list">
           <article
             class="activity-card"
             *ngFor="let activity of day.activities; trackBy: trackByActivityId"
