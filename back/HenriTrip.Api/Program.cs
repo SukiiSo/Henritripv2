@@ -202,6 +202,7 @@ app.MapDelete("/api/users/{id:int}", (HttpContext http, int id) =>
 /* ---------------- GUIDES ---------------- */
 
 // Liste guides
+// Liste guides
 app.MapGet("/api/guides", (HttpContext http, [FromQuery] string? search) =>
 {
     var current = GetCurrentUser(http);
@@ -246,6 +247,7 @@ app.MapGet("/api/guides", (HttpContext http, [FromQuery] string? search) =>
 });
 
 // Détail guide
+// Détail guide
 app.MapGet("/api/guides/{id:int}", (HttpContext http, int id) =>
 {
     var current = GetCurrentUser(http);
@@ -289,6 +291,12 @@ app.MapGet("/api/guides/{id:int}", (HttpContext http, int id) =>
         ))
         .ToList();
 
+    // Important pour le front admin (checkbox invitations)
+    var invitedUserIds = db.GuideInvitations
+        .Where(i => i.GuideId == id)
+        .Select(i => i.UserId)
+        .ToList();
+
     var result = new GuideDetailResponse(
         guide.Id,
         guide.Title,
@@ -299,7 +307,8 @@ app.MapGet("/api/guides/{id:int}", (HttpContext http, int id) =>
         guide.Mobility.ToString(),
         guide.Season.ToString(),
         guide.ForWho.ToString(),
-        days
+        days,
+        invitedUserIds
     );
 
     return Results.Ok(result);
@@ -988,7 +997,8 @@ record GuideDetailResponse(
     string Mobility,
     string Season,
     string ForWho,
-    List<GuideDayResponse> Days
+    List<GuideDayResponse> Days,
+    List<int> InvitedUserIds
 );
 
 record GuideDayResponse(

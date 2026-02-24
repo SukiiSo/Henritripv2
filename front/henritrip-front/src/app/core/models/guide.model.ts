@@ -35,4 +35,5 @@ export interface GuideDay {
 
 export interface GuideDetail extends Guide {
   days: GuideDay[]
+  invitedUserIds?: number[]
 }
