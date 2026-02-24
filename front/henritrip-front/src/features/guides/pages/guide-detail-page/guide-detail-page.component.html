@@ -1,7 +1,5 @@
-<section class="page">
-  <div class="top-actions">
-    <a routerLink="/guides" class="back-link">← Retour aux guides</a>
-  </div>
+<section class="guide-detail-page">
+  <a class="back-link" routerLink="/guides">← Retour aux guides</a>
 
   <div *ngIf="loading" class="state">Chargement du guide...</div>
 
@@ -11,64 +9,89 @@
 
   <ng-container *ngIf="!loading && guide as g">
     <header class="hero">
-      <div class="hero-cover" [class.placeholder]="!g.coverImageUrl">
+      <div class="hero-media" [class.placeholder]="!g.coverImageUrl">
         <img *ngIf="g.coverImageUrl" [src]="g.coverImageUrl" [alt]="g.title" />
         <span *ngIf="!g.coverImageUrl">Guide</span>
       </div>
 
       <div class="hero-content">
+        <p class="eyebrow">{{ g.destination || 'Destination non précisée' }}</p>
         <h1>{{ g.title }}</h1>
-        <p class="destination" *ngIf="g.destination">{{ g.destination }}</p>
-        <p class="description">{{ g.description }}</p>
-        <div class="meta">
-          <span>{{ g.days.length }} jour(s)</span>
+        <p class="hero-description">{{ g.description }}</p>
+
+        <div class="chips">
+          <span>{{ g.daysCount ?? g.days?.length ?? 0 }} jour(s)</span>
+          <span *ngIf="g.mobility">Mobilité: {{ g.mobility }}</span>
+          <span *ngIf="g.season">Saison: {{ g.season }}</span>
+          <span *ngIf="g.forWho">Pour: {{ g.forWho }}</span>
         </div>
       </div>
     </header>
 
-    <section class="days-section" *ngIf="g.days.length; else noDays">
-      <div class="days-nav" role="tablist" aria-label="Jours du guide">
+    <section class="days-section" *ngIf="g.days?.length; else noDays">
+      <h2>Jours du guide</h2>
+
+      <div class="days-tabs">
         <button
           type="button"
-          class="day-pill"
+          class="day-tab"
           *ngFor="let day of g.days; trackBy: trackByDayId"
-          [class.active]="selectedDayId === day.id"
+          [class.active]="day.id === selectedDayId"
           (click)="selectDay(day)"
         >
-          Jour {{ day.dayNumber }}
+          <span class="day-number">Jour {{ day.dayNumber }}</span>
+          <span class="day-title">{{ day.title }}</span>
         </button>
       </div>
 
-      <div class="day-content" *ngIf="selectedDay as day">
-        <div class="day-header">
-          <h2>Jour {{ day.dayNumber }} · {{ day.title }}</h2>
-          <p *ngIf="day.date">{{ day.date }}</p>
+      <div class="day-panel" *ngIf="selectedDay as day">
+        <div class="day-panel-header">
+          <div>
+            <h3>Jour {{ day.dayNumber }} · {{ day.title }}</h3>
+            <p *ngIf="day.date">{{ day.date }}</p>
+          </div>
         </div>
 
-        <div *ngIf="!day.activities.length" class="state">
-          Aucune activité pour ce jour.
+        <div *ngIf="day.activities?.length; else noActivities" class="activities-list">
+          <article
+            class="activity-card"
+            *ngFor="let activity of day.activities; trackBy: trackByActivityId"
+          >
+            <div class="activity-order">{{ activity.visitOrder }}</div>
+
+            <div class="activity-content">
+              <div class="activity-head">
+                <h4>{{ activity.title }}</h4>
+                <span class="category">{{ activity.category }}</span>
+              </div>
+
+              <p class="activity-description">{{ activity.description }}</p>
+
+              <ul class="activity-meta">
+                <li *ngIf="activity.address"><strong>Adresse:</strong> {{ activity.address }}</li>
+                <li *ngIf="activity.openingHours"><strong>Horaires:</strong> {{ activity.openingHours }}</li>
+                <li *ngIf="activity.phoneNumber"><strong>Téléphone:</strong> {{ activity.phoneNumber }}</li>
+                <li *ngIf="activity.website">
+                  <strong>Site:</strong>
+                  <a [href]="activity.website" target="_blank" rel="noopener noreferrer">
+                    {{ activity.website }}
+                  </a>
+                </li>
+                <li *ngIf="activity.forWho"><strong>Pour:</strong> {{ activity.forWho }}</li>
+              </ul>
+            </div>
+          </article>
         </div>
-
-        <ul *ngIf="day.activities.length" class="activities">
-          <li *ngFor="let activity of day.activities; trackBy: trackByActivityId" class="activity-card">
-            <div class="activity-main">
-              <h3>{{ activity.title }}</h3>
-              <p *ngIf="activity.description">{{ activity.description }}</p>
-            </div>
-
-            <div class="activity-meta">
-              <span *ngIf="activity.startTime || activity.endTime">
-                {{ activity.startTime || '--:--' }} - {{ activity.endTime || '--:--' }}
-              </span>
-              <span *ngIf="activity.location">{{ activity.location }}</span>
-            </div>
-          </li>
-        </ul>
       </div>
+
     </section>
 
+    <ng-template #noActivities>
+      <div class="state">Aucune activité pour ce jour.</div>
+    </ng-template>
+
     <ng-template #noDays>
-      <div class="state">Ce guide ne contient pas encore de jours.</div>
+      <div class="state">Aucun jour disponible pour ce guide.</div>
     </ng-template>
   </ng-container>
 </section>

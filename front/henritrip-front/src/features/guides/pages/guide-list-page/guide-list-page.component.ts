@@ -1,8 +1,9 @@
-import { Component, OnInit, inject, PLATFORM_ID } from '@angular/core'
+import { Component, OnInit, OnDestroy, inject, PLATFORM_ID, ChangeDetectorRef } from '@angular/core'
 import { CommonModule, isPlatformBrowser } from '@angular/common'
 import { RouterLink } from '@angular/router'
 import { FormsModule } from '@angular/forms'
-import { debounceTime, distinctUntilChanged, Subject } from 'rxjs'
+import { Subject, debounceTime, distinctUntilChanged, timeout, finalize, takeUntil } from 'rxjs'
+
 import { Guide } from '../../../../app/core/models/guide.model'
 import { GuidesService } from '../../../../app/core/models/services/services'
 
@@ -13,10 +14,13 @@ import { GuidesService } from '../../../../app/core/models/services/services'
   templateUrl: './guide-list-page.component.html',
   styleUrl: './guide-list-page.component.scss'
 })
-export class GuideListPageComponent implements OnInit {
+export class GuideListPageComponent implements OnInit, OnDestroy {
   private guidesService = inject(GuidesService)
   private platformId = inject(PLATFORM_ID)
+  private cdr = inject(ChangeDetectorRef)
+
   private searchSubject = new Subject<string>()
+  private destroy$ = new Subject<void>()
 
   guides: Guide[] = []
   filteredGuides: Guide[] = []
@@ -30,47 +34,84 @@ export class GuideListPageComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    if (!this.isBrowser) {
+      return
+    }
+
     this.loadGuides()
 
     this.searchSubject
-      .pipe(debounceTime(250), distinctUntilChanged())
+      .pipe(
+        debounceTime(250),
+        distinctUntilChanged(),
+        takeUntil(this.destroy$)
+      )
       .subscribe(() => {
         this.applyFilter()
+        this.cdr.detectChanges()
       })
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next()
+    this.destroy$.complete()
   }
 
   loadGuides(): void {
     this.loading = true
     this.errorMessage = ''
 
-    this.guidesService.getGuides().subscribe({
-      next: (data: Guide[]) => {
-        this.guides = data ?? []
-        this.applyFilter()
-        this.loading = false
+    this.guidesService.getGuides()
+      .pipe(
+        timeout(8000),
+        finalize(() => {
+          this.loading = false
+          this.cdr.detectChanges()
+        }),
+        takeUntil(this.destroy$)
+      )
+      .subscribe({
+        next: (data: Guide[]) => {
+          console.log('GUIDES OK', data)
 
-        if (this.isBrowser) {
-          localStorage.setItem('guides_cache', JSON.stringify(this.guides))
-        }
-      },
-      error: () => {
-        if (this.isBrowser) {
-          const cached = localStorage.getItem('guides_cache')
+          this.guides = data ?? []
+          this.applyFilter()
 
-          if (cached) {
-            this.guides = JSON.parse(cached) as Guide[]
-            this.applyFilter()
-            this.errorMessage = 'API indisponible. Données locales affichées.'
-          } else {
-            this.errorMessage = 'Impossible de charger les guides.'
+          if (this.isBrowser) {
+            try {
+              localStorage.setItem('guides_cache', JSON.stringify(this.guides))
+            } catch (e) {
+              console.warn('Cache localStorage impossible', e)
+            }
           }
-        } else {
-          this.errorMessage = 'Impossible de charger les guides.'
-        }
 
-        this.loading = false
-      }
-    })
+          this.cdr.detectChanges()
+        },
+        error: (err) => {
+          console.error('Erreur liste guides', err)
+
+          if (this.isBrowser) {
+            try {
+              const cached = localStorage.getItem('guides_cache')
+
+              if (cached) {
+                this.guides = JSON.parse(cached) as Guide[]
+                this.applyFilter()
+                this.errorMessage = 'API indisponible. Données locales affichées.'
+                this.cdr.detectChanges()
+                return
+              }
+            } catch (e) {
+              console.warn('Lecture cache impossible', e)
+            }
+          }
+
+          this.guides = []
+          this.filteredGuides = []
+          this.errorMessage = 'Impossible de charger les guides.'
+          this.cdr.detectChanges()
+        }
+      })
   }
 
   onSearchInput(value: string): void {
@@ -81,6 +122,7 @@ export class GuideListPageComponent implements OnInit {
   clearSearch(): void {
     this.searchTerm = ''
     this.applyFilter()
+    this.cdr.detectChanges()
   }
 
   trackByGuideId(index: number, guide: Guide): number {

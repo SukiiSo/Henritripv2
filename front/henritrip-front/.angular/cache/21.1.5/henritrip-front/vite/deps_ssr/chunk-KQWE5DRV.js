@@ -1,7 +1,7 @@
 import { createRequire } from 'module';const require = createRequire(import.meta.url);
 import {
   PlatformLocation
-} from "./chunk-WQHSWK47.js";
+} from "./chunk-AR5JHKXA.js";
 import {
   Attribute,
   ChangeDetectorRef,
@@ -4436,4 +4436,4 @@ export {
   PRECONNECT_CHECK_BLOCKLIST,
   NgOptimizedImage
 };
-//# sourceMappingURL=chunk-OWCI4TTG.js.map
+//# sourceMappingURL=chunk-KQWE5DRV.js.map

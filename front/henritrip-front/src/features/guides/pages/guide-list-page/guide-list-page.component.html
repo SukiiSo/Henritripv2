@@ -53,6 +53,9 @@
 
         <div class="meta">
           <span>{{ guide.daysCount ?? 0 }} jour(s)</span>
+          <span *ngIf="guide.mobility">{{ guide.mobility }}</span>
+          <span *ngIf="guide.season">{{ guide.season }}</span>
+          <span *ngIf="guide.forWho">{{ guide.forWho }}</span>
         </div>
       </div>
     </a>
