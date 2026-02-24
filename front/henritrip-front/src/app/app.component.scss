@@ -1,0 +1,58 @@
+:host {
+  display: block;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(21, 28, 43, 0.95);
+  border-bottom: 1px solid #273149;
+  color: #eef3ff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+}
+
+.topbar-nav {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.topbar-nav a {
+  color: #dfe8ff;
+  text-decoration: none;
+  border: 1px solid #313d59;
+  background: #242e45;
+  border-radius: 10px;
+  padding: 6px 10px;
+}
+
+.session {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.badge {
+  border-radius: 999px;
+  padding: 4px 8px;
+  background: rgba(88, 165, 255, 0.12);
+  border: 1px solid rgba(88, 165, 255, 0.25);
+  color: #9cc7ff;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.session button {
+  border: 1px solid #3a445e;
+  background: transparent;
+  color: #dfe8ff;
+  border-radius: 10px;
+  padding: 6px 10px;
+  cursor: pointer;
+}

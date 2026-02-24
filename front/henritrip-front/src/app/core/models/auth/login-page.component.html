@@ -1,0 +1,40 @@
+<div class="login-page">
+  <div class="login-card">
+    <div class="brand">
+      <img class="brand-logo" src="assets/logo.png" alt="HenriTrip" onerror="this.style.display='none'" />
+      <div>
+        <h1>HenriTrip</h1>
+        <p>Connexion</p>
+      </div>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div>
+        <label for="email">Email</label>
+        <input id="email" type="email" formControlName="email" placeholder="admin@henritrip.test" />
+      </div>
+
+      <div>
+        <label for="password">Mot de passe</label>
+        <input id="password" type="password" formControlName="password" placeholder="••••••••" />
+      </div>
+
+      <div class="error" *ngIf="errorMessage">
+        {{ errorMessage }}
+      </div>
+
+      <button class="btn btn-primary" type="submit" [disabled]="loading">
+        {{ loading ? 'Connexion...' : 'Se connecter' }}
+      </button>
+    </form>
+
+    <div class="quick-actions">
+      <p>Connexion rapide</p>
+      <div class="quick-buttons">
+        <button class="btn btn-secondary" type="button" (click)="quickLogin('admin')">Admin</button>
+        <button class="btn btn-secondary" type="button" (click)="quickLogin('alice')">Alice</button>
+        <button class="btn btn-secondary" type="button" (click)="quickLogin('bob')">Bob</button>
+      </div>
+    </div>
+  </div>
+</div>

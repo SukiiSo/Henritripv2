@@ -1,0 +1,16 @@
+<header class="topbar" *ngIf="auth.isLoggedIn()">
+  <nav class="topbar-nav">
+    <a routerLink="/guides">Guides</a>
+    <a *ngIf="auth.isAdmin()" routerLink="/admin">Admin</a>
+    <a *ngIf="auth.isAdmin()" routerLink="/admin/users">Users</a>
+    <a *ngIf="auth.isAdmin()" routerLink="/admin/guides">Guides admin</a>
+  </nav>
+
+  <div class="session">
+    <span class="badge">{{ auth.getCurrentUser()?.role }}</span>
+    <span>{{ auth.getCurrentUser()?.email }}</span>
+    <button type="button" (click)="logout()">Déconnexion</button>
+  </div>
+</header>
+
+<router-outlet></router-outlet>
