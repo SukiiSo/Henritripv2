@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
-import { finalize } from 'rxjs'
+import { finalize, take, timeout, catchError, of } from 'rxjs'
 
 import { Guide, GuideDetail, GuideDay, GuideActivity } from '../guide.model'
 import {
@@ -155,19 +155,20 @@ type ActivityForm = {
 
         <div style="display:flex; gap:8px; align-items:center;">
           <input
-            [(ngModel)]="search"
-            (keyup.enter)="refreshGuidesList()"
-            placeholder="Recherche"
-            style="border-radius:10px; border:1px solid #344d7b; background:#111c35; color:#eef3ff; padding:8px 10px;"
-          />
-          <button
-            type="button"
-            (click)="refreshGuidesList()"
-            [disabled]="loadingGuides"
-            style="border-radius:10px; border:1px solid #344d7b; background:#172645; color:#e4ecff; padding:8px 12px; cursor:pointer;"
-          >
-            {{ loadingGuides ? 'Chargement...' : 'Rafraîchir' }}
-          </button>
+  [(ngModel)]="search"
+  (keyup.enter)="refreshGuidesList()"
+  placeholder="Recherche"
+  style="border-radius:10px; border:1px solid #344d7b; background:#111c35; color:#eef3ff; padding:8px 10px;"
+/>
+
+<button
+  type="button"
+  (click)="refreshGuidesList()"
+
+  style="border-radius:10px; border:1px solid #344d7b; background:#172645; color:#e4ecff; padding:8px 12px; cursor:pointer;"
+>
+  {{ loadingGuides ? 'Chargement...' : 'Rafraîchir' }}
+</button>
         </div>
       </div>
 
@@ -535,10 +536,24 @@ export class AdminGuidesPageComponent implements OnInit {
 
   activityForm: ActivityForm = this.getEmptyActivityForm()
 
-  ngOnInit(): void {
-    this.initialLoad()
-  }
+ngOnInit(): void {
+  this.refreshGuidesList()
+}
 
+refreshGuidesList(): void {
+  this.errorMessage = ''
+  this.message = ''
+
+  // Débloque un éventuel état coincé
+  this.resetLoadingStates()
+
+  this.loadGuides()
+  this.loadUsers()
+
+  if (this.selectedGuideDetail?.id) {
+    this.openGuideAdmin(this.selectedGuideDetail.id, false)
+  }
+}
   private initialLoad(): void {
     this.errorMessage = ''
     this.message = ''
@@ -546,67 +561,101 @@ export class AdminGuidesPageComponent implements OnInit {
     this.loadUsers()
   }
 
-  refreshGuidesList(): void {
-    this.errorMessage = ''
-    this.message = ''
+  private resetLoadingStates(): void {
+  this.loadingGuides = false
+  this.loadingUsers = false
+  this.loadingGuideDetailId = null
+}
 
-    this.loadGuides()
 
-    if (this.selectedGuideDetail?.id) {
-      this.openGuideAdmin(this.selectedGuideDetail.id, false)
-    }
-  }
+ loadGuides(): void {
+  const reqId = ++this.guidesRequestSeq
 
-  loadGuides(): void {
-    const reqId = ++this.guidesRequestSeq
+  this.loadingGuides = true
+  this.errorMessage = ''
 
-    this.loadingGuides = true
-    this.errorMessage = ''
-
-    this.adminGuidesService.getGuides(this.search)
-      .pipe(finalize(() => {
+  this.adminGuidesService.getGuides(this.search)
+    .pipe(
+      take(1),
+      timeout(10000),
+      catchError((err) => {
+        if (reqId === this.guidesRequestSeq) {
+          this.errorMessage = err?.error?.message ?? 'Impossible de charger les guides.'
+        }
+        return of([])
+      }),
+      finalize(() => {
         if (reqId === this.guidesRequestSeq) {
           this.loadingGuides = false
         }
-      }))
-      .subscribe({
-        next: (guides) => {
-          if (reqId !== this.guidesRequestSeq) return
-
-          this.guides = [...(guides ?? [])]
-        },
-        error: (err) => {
-          if (reqId !== this.guidesRequestSeq) return
-
-          this.errorMessage = err?.error?.message ?? 'Impossible de charger les guides.'
-        }
       })
-  }
+    )
+    .subscribe({
+      next: (result: any) => {
+        if (reqId !== this.guidesRequestSeq) return
+
+        // Accepte plusieurs formats de réponse
+        const guides = Array.isArray(result)
+          ? result
+          : Array.isArray(result?.data)
+          ? result.data
+          : Array.isArray(result?.items)
+          ? result.items
+          : []
+
+        this.guides = [...guides]
+        this.loadingGuides = false
+      },
+      error: () => {
+        // Sécurité supplémentaire
+        if (reqId !== this.guidesRequestSeq) return
+        this.loadingGuides = false
+      }
+    })
+}
 
   loadUsers(): void {
-    const reqId = ++this.usersRequestSeq
+  const reqId = ++this.usersRequestSeq
 
-    this.loadingUsers = true
+  this.loadingUsers = true
 
-    this.adminUsersService.getUsers()
-      .pipe(finalize(() => {
+  this.adminUsersService.getUsers()
+    .pipe(
+      take(1),
+      timeout(10000),
+      catchError((err) => {
+        if (reqId === this.usersRequestSeq) {
+          this.errorMessage = err?.error?.message ?? 'Impossible de charger les users.'
+        }
+        return of([])
+      }),
+      finalize(() => {
         if (reqId === this.usersRequestSeq) {
           this.loadingUsers = false
         }
-      }))
-      .subscribe({
-        next: (users) => {
-          if (reqId !== this.usersRequestSeq) return
-
-          this.allUsers = [...(users ?? []).filter(u => u.role === 'User')]
-        },
-        error: (err) => {
-          if (reqId !== this.usersRequestSeq) return
-
-          this.errorMessage = err?.error?.message ?? 'Impossible de charger les users.'
-        }
       })
-  }
+    )
+    .subscribe({
+      next: (result: any) => {
+        if (reqId !== this.usersRequestSeq) return
+
+        const users = Array.isArray(result)
+          ? result
+          : Array.isArray(result?.data)
+          ? result.data
+          : Array.isArray(result?.items)
+          ? result.items
+          : []
+
+        this.allUsers = [...users.filter((u: AdminUser) => u.role === 'User')]
+        this.loadingUsers = false
+      },
+      error: () => {
+        if (reqId !== this.usersRequestSeq) return
+        this.loadingUsers = false
+      }
+    })
+}
 
   submitGuideForm(): void {
     this.errorMessage = ''
