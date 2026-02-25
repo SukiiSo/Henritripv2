@@ -7,12 +7,32 @@ import { RouterLink } from '@angular/router'
   standalone: true,
   imports: [CommonModule, RouterLink],
   template: `
-    <section style="padding:16px; color:#eef3ff; background:#151c2b; min-height:100vh;">
-      <h1>Admin</h1>
-      <p>Portail administration</p>
-      <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <a routerLink="/admin/users">Gérer les users</a>
-        <a routerLink="/admin/guides">Gérer les guides</a>
+    <section style="padding:20px; color:#eef3ff; background:#151c2b; min-height:100vh;">
+      <div style="max-width:760px; margin:0 auto; background:#1b2335; border:1px solid #273149; border-radius:18px; padding:18px; box-shadow:0 12px 26px rgba(0,0,0,0.2);">
+        <div style="display:inline-flex; align-items:center; border-radius:999px; padding:4px 10px; background:rgba(88,165,255,0.12); border:1px solid rgba(88,165,255,0.25); color:#9cc7ff; font-weight:600; font-size:0.85rem; margin-bottom:10px;">
+          Admin
+        </div>
+
+        <h1 style="margin:0; font-size:1.35rem; line-height:1.2;">Portail administration</h1>
+        <p style="margin:8px 0 0; color:#b6bfd3; font-size:0.95rem;">
+          Gérez les utilisateurs et les guides depuis cet espace.
+        </p>
+
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:16px;">
+          <a
+            routerLink="/admin/users"
+            style="text-decoration:none; border:1px solid #58a5ff; background:#58a5ff; color:#08111f; border-radius:12px; padding:11px 14px; font-weight:600; min-height:42px; display:inline-flex; align-items:center; justify-content:center;"
+          >
+            Gérer les users
+          </a>
+
+          <a
+            routerLink="/admin/guides"
+            style="text-decoration:none; border:1px solid #313d59; background:#242e45; color:#dce6ff; border-radius:12px; padding:11px 14px; font-weight:600; min-height:42px; display:inline-flex; align-items:center; justify-content:center;"
+          >
+            Gérer les guides
+          </a>
+        </div>
       </div>
     </section>
   `

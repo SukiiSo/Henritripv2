@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core'
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { finalize } from 'rxjs'
@@ -106,7 +106,7 @@ import { AdminUsersService, AdminUser } from './admin-users.service'
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let user of users" style="border-bottom:1px solid #223357;">
+            <tr *ngFor="let user of users; trackBy: trackByUserId" style="border-bottom:1px solid #223357;">
               <td style="padding:10px;">{{ user.id }}</td>
               <td style="padding:10px;">{{ user.email }}</td>
               <td style="padding:10px;">{{ user.role }}</td>
@@ -129,6 +129,7 @@ import { AdminUsersService, AdminUser } from './admin-users.service'
 })
 export class AdminUsersPageComponent implements OnInit {
   private adminUsersService = inject(AdminUsersService)
+  private cdr = inject(ChangeDetectorRef)
 
   users: AdminUser[] = []
 
@@ -149,19 +150,33 @@ export class AdminUsersPageComponent implements OnInit {
     this.loadUsers()
   }
 
+  trackByUserId(_: number, user: AdminUser): number {
+    return user.id
+  }
+
   loadUsers(): void {
+    if (this.loading) return
+
     this.errorMessage = ''
     this.message = ''
     this.loading = true
+    this.cdr.detectChanges()
 
     this.adminUsersService.getUsers()
-      .pipe(finalize(() => (this.loading = false)))
+      .pipe(
+        finalize(() => {
+          this.loading = false
+          this.cdr.detectChanges()
+        })
+      )
       .subscribe({
-        next: (users) => {
-          this.users = users ?? []
+        next: (users: AdminUser[]) => {
+          this.users = [...(users ?? [])]
+          this.cdr.detectChanges()
         },
-        error: (err) => {
+        error: (err: any) => {
           this.errorMessage = err?.error?.message ?? 'Impossible de charger les utilisateurs.'
+          this.cdr.detectChanges()
         }
       })
   }
@@ -172,25 +187,33 @@ export class AdminUsersPageComponent implements OnInit {
 
     if (!this.form.email.trim() || !this.form.password.trim()) {
       this.errorMessage = 'Email et mot de passe obligatoires.'
+      this.cdr.detectChanges()
       return
     }
 
     this.saving = true
+    this.cdr.detectChanges()
 
     this.adminUsersService.createUser({
       email: this.form.email.trim(),
       password: this.form.password.trim(),
       role: this.form.role
     })
-      .pipe(finalize(() => (this.saving = false)))
+      .pipe(
+        finalize(() => {
+          this.saving = false
+          this.cdr.detectChanges()
+        })
+      )
       .subscribe({
         next: () => {
           this.message = 'Utilisateur créé.'
           this.resetForm()
           this.loadUsers()
         },
-        error: (err) => {
+        error: (err: any) => {
           this.errorMessage = err?.error?.message ?? 'Impossible de créer l utilisateur.'
+          this.cdr.detectChanges()
         }
       })
   }
@@ -203,16 +226,24 @@ export class AdminUsersPageComponent implements OnInit {
     if (!ok) return
 
     this.deletingIds.add(user.id)
+    this.cdr.detectChanges()
 
     this.adminUsersService.deleteUser(user.id)
-      .pipe(finalize(() => this.deletingIds.delete(user.id)))
+      .pipe(
+        finalize(() => {
+          this.deletingIds.delete(user.id)
+          this.cdr.detectChanges()
+        })
+      )
       .subscribe({
         next: () => {
           this.message = 'Utilisateur supprimé.'
           this.users = this.users.filter(u => u.id !== user.id)
+          this.cdr.detectChanges()
         },
-        error: (err) => {
+        error: (err: any) => {
           this.errorMessage = err?.error?.message ?? 'Impossible de supprimer l utilisateur.'
+          this.cdr.detectChanges()
         }
       })
   }
@@ -223,5 +254,6 @@ export class AdminUsersPageComponent implements OnInit {
       password: '',
       role: 'User'
     }
+    this.cdr.detectChanges()
   }
 }

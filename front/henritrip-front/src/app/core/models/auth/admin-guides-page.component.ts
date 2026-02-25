@@ -156,13 +156,13 @@ type ActivityForm = {
         <div style="display:flex; gap:8px; align-items:center;">
           <input
             [(ngModel)]="search"
-            (keyup.enter)="loadGuides()"
+            (keyup.enter)="refreshGuidesList()"
             placeholder="Recherche"
             style="border-radius:10px; border:1px solid #344d7b; background:#111c35; color:#eef3ff; padding:8px 10px;"
           />
           <button
             type="button"
-            (click)="loadGuides()"
+            (click)="refreshGuidesList()"
             [disabled]="loadingGuides"
             style="border-radius:10px; border:1px solid #344d7b; background:#172645; color:#e4ecff; padding:8px 12px; cursor:pointer;"
           >
@@ -490,6 +490,10 @@ export class AdminGuidesPageComponent implements OnInit {
   private adminGuidesService = inject(AdminGuidesService)
   private adminUsersService = inject(AdminUsersService)
 
+  private guidesRequestSeq = 0
+  private usersRequestSeq = 0
+  private guideDetailRequestSeq = 0
+
   guides: Guide[] = []
   allUsers: AdminUser[] = []
 
@@ -532,36 +536,73 @@ export class AdminGuidesPageComponent implements OnInit {
   activityForm: ActivityForm = this.getEmptyActivityForm()
 
   ngOnInit(): void {
+    this.initialLoad()
+  }
+
+  private initialLoad(): void {
+    this.errorMessage = ''
+    this.message = ''
     this.loadGuides()
     this.loadUsers()
   }
 
+  refreshGuidesList(): void {
+    this.errorMessage = ''
+    this.message = ''
+
+    this.loadGuides()
+
+    if (this.selectedGuideDetail?.id) {
+      this.openGuideAdmin(this.selectedGuideDetail.id, false)
+    }
+  }
+
   loadGuides(): void {
+    const reqId = ++this.guidesRequestSeq
+
     this.loadingGuides = true
     this.errorMessage = ''
 
     this.adminGuidesService.getGuides(this.search)
-      .pipe(finalize(() => (this.loadingGuides = false)))
+      .pipe(finalize(() => {
+        if (reqId === this.guidesRequestSeq) {
+          this.loadingGuides = false
+        }
+      }))
       .subscribe({
         next: (guides) => {
-          this.guides = guides ?? []
+          if (reqId !== this.guidesRequestSeq) return
+
+          this.guides = [...(guides ?? [])]
         },
         error: (err) => {
+          if (reqId !== this.guidesRequestSeq) return
+
           this.errorMessage = err?.error?.message ?? 'Impossible de charger les guides.'
         }
       })
   }
 
   loadUsers(): void {
+    const reqId = ++this.usersRequestSeq
+
     this.loadingUsers = true
 
     this.adminUsersService.getUsers()
-      .pipe(finalize(() => (this.loadingUsers = false)))
+      .pipe(finalize(() => {
+        if (reqId === this.usersRequestSeq) {
+          this.loadingUsers = false
+        }
+      }))
       .subscribe({
         next: (users) => {
-          this.allUsers = (users ?? []).filter(u => u.role === 'User')
+          if (reqId !== this.usersRequestSeq) return
+
+          this.allUsers = [...(users ?? []).filter(u => u.role === 'User')]
         },
         error: (err) => {
+          if (reqId !== this.usersRequestSeq) return
+
           this.errorMessage = err?.error?.message ?? 'Impossible de charger les users.'
         }
       })
@@ -601,6 +642,7 @@ export class AdminGuidesPageComponent implements OnInit {
           next: () => {
             this.message = 'Guide mis à jour.'
             this.loadGuides()
+
             if (this.selectedGuideDetail?.id === this.guideForm.id) {
               this.openGuideAdmin(this.guideForm.id)
             }
@@ -627,14 +669,22 @@ export class AdminGuidesPageComponent implements OnInit {
   }
 
   editGuide(id: number): void {
+    const reqId = ++this.guideDetailRequestSeq
+
     this.loadingGuideDetailId = id
     this.errorMessage = ''
     this.message = ''
 
     this.adminGuidesService.getGuideById(id)
-      .pipe(finalize(() => (this.loadingGuideDetailId = null)))
+      .pipe(finalize(() => {
+        if (reqId === this.guideDetailRequestSeq) {
+          this.loadingGuideDetailId = null
+        }
+      }))
       .subscribe({
         next: (guide) => {
+          if (reqId !== this.guideDetailRequestSeq) return
+
           this.guideForm = {
             id: guide.id,
             title: guide.title ?? '',
@@ -646,15 +696,20 @@ export class AdminGuidesPageComponent implements OnInit {
             destination: guide.destination ?? '',
             coverImageUrl: guide.coverImageUrl ?? ''
           }
+
           window.scrollTo({ top: 0, behavior: 'smooth' })
         },
         error: (err) => {
+          if (reqId !== this.guideDetailRequestSeq) return
+
           this.errorMessage = err?.error?.message ?? 'Impossible de charger le guide.'
         }
       })
   }
 
-  openGuideAdmin(id: number): void {
+  openGuideAdmin(id: number, scroll = true): void {
+    const reqId = ++this.guideDetailRequestSeq
+
     this.loadingGuideDetailId = id
     this.errorMessage = ''
     this.message = ''
@@ -666,17 +721,27 @@ export class AdminGuidesPageComponent implements OnInit {
     this.resetActivityForm()
 
     this.adminGuidesService.getGuideById(id)
-      .pipe(finalize(() => (this.loadingGuideDetailId = null)))
+      .pipe(finalize(() => {
+        if (reqId === this.guideDetailRequestSeq) {
+          this.loadingGuideDetailId = null
+        }
+      }))
       .subscribe({
         next: (guide) => {
+          if (reqId !== this.guideDetailRequestSeq) return
+
           this.selectedGuideDetail = guide
 
           const invited = (guide.invitedUserIds ?? []) as number[]
           this.selectedGuideInvitedUserIds = new Set(invited)
 
-          window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })
+          if (scroll) {
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })
+          }
         },
         error: (err) => {
+          if (reqId !== this.guideDetailRequestSeq) return
+
           this.errorMessage = err?.error?.message ?? 'Impossible de charger le détail du guide.'
         }
       })
@@ -718,42 +783,42 @@ export class AdminGuidesPageComponent implements OnInit {
   }
 
   toggleInvitation(user: AdminUser, checked: boolean): void {
-  if (!this.selectedGuideDetail) return
+    if (!this.selectedGuideDetail) return
 
-  this.errorMessage = ''
-  this.message = ''
-  this.invitationBusyUserIds.add(user.id)
+    this.errorMessage = ''
+    this.message = ''
+    this.invitationBusyUserIds.add(user.id)
 
-  const guideId = this.selectedGuideDetail.id
+    const guideId = this.selectedGuideDetail.id
 
-  if (checked) {
-    this.adminGuidesService.inviteUser(guideId, user.id)
+    if (checked) {
+      this.adminGuidesService.inviteUser(guideId, user.id)
+        .pipe(finalize(() => this.invitationBusyUserIds.delete(user.id)))
+        .subscribe({
+          next: () => {
+            this.selectedGuideInvitedUserIds.add(user.id)
+            this.message = `Invitation ajoutée pour ${user.email}.`
+          },
+          error: (err: any) => {
+            this.errorMessage = err?.error?.message ?? 'Impossible de modifier l invitation.'
+          }
+        })
+
+      return
+    }
+
+    this.adminGuidesService.removeInvitation(guideId, user.id)
       .pipe(finalize(() => this.invitationBusyUserIds.delete(user.id)))
       .subscribe({
         next: () => {
-          this.selectedGuideInvitedUserIds.add(user.id)
-          this.message = `Invitation ajoutée pour ${user.email}.`
+          this.selectedGuideInvitedUserIds.delete(user.id)
+          this.message = `Invitation retirée pour ${user.email}.`
         },
         error: (err: any) => {
           this.errorMessage = err?.error?.message ?? 'Impossible de modifier l invitation.'
         }
       })
-
-    return
   }
-
-  this.adminGuidesService.removeInvitation(guideId, user.id)
-    .pipe(finalize(() => this.invitationBusyUserIds.delete(user.id)))
-    .subscribe({
-      next: () => {
-        this.selectedGuideInvitedUserIds.delete(user.id)
-        this.message = `Invitation retirée pour ${user.email}.`
-      },
-      error: (err: any) => {
-        this.errorMessage = err?.error?.message ?? 'Impossible de modifier l invitation.'
-      }
-    })
-}
 
   toggleDayEdit(dayId: number): void {
     if (!this.selectedGuideDetail) return
