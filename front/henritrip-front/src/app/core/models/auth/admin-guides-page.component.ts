@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core'
+import { Component, OnInit, inject, ChangeDetectorRef, NgZone } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { finalize, take, timeout, catchError, of } from 'rxjs'
@@ -164,7 +164,6 @@ type ActivityForm = {
 <button
   type="button"
   (click)="refreshGuidesList()"
-
   style="border-radius:10px; border:1px solid #344d7b; background:#172645; color:#e4ecff; padding:8px 12px; cursor:pointer;"
 >
   {{ loadingGuides ? 'Chargement...' : 'Rafraîchir' }}
@@ -490,8 +489,12 @@ type ActivityForm = {
 export class AdminGuidesPageComponent implements OnInit {
   private adminGuidesService = inject(AdminGuidesService)
   private adminUsersService = inject(AdminUsersService)
+  private cdr = inject(ChangeDetectorRef)
+  private ngZone = inject(NgZone)
 
   private guidesRequestSeq = 0
+  private openGuideRequestSeq = 0
+  private editGuideRequestSeq = 0
   private usersRequestSeq = 0
   private guideDetailRequestSeq = 0
 
@@ -560,6 +563,12 @@ refreshGuidesList(): void {
     this.loadGuides()
     this.loadUsers()
   }
+ private uiUpdate(fn: () => void): void {
+  this.ngZone.run(() => {
+    fn()
+    this.cdr.detectChanges()
+  })
+}
 
   private resetLoadingStates(): void {
   this.loadingGuides = false
@@ -571,22 +580,20 @@ refreshGuidesList(): void {
  loadGuides(): void {
   const reqId = ++this.guidesRequestSeq
 
-  this.loadingGuides = true
-  this.errorMessage = ''
+  this.uiUpdate(() => {
+    this.loadingGuides = true
+    this.errorMessage = ''
+  })
 
   this.adminGuidesService.getGuides(this.search)
     .pipe(
       take(1),
       timeout(10000),
-      catchError((err) => {
-        if (reqId === this.guidesRequestSeq) {
-          this.errorMessage = err?.error?.message ?? 'Impossible de charger les guides.'
-        }
-        return of([])
-      }),
       finalize(() => {
         if (reqId === this.guidesRequestSeq) {
-          this.loadingGuides = false
+          this.uiUpdate(() => {
+            this.loadingGuides = false
+          })
         }
       })
     )
@@ -594,7 +601,6 @@ refreshGuidesList(): void {
       next: (result: any) => {
         if (reqId !== this.guidesRequestSeq) return
 
-        // Accepte plusieurs formats de réponse
         const guides = Array.isArray(result)
           ? result
           : Array.isArray(result?.data)
@@ -603,13 +609,17 @@ refreshGuidesList(): void {
           ? result.items
           : []
 
-        this.guides = [...guides]
-        this.loadingGuides = false
+        this.uiUpdate(() => {
+          this.guides = [...guides]
+        })
       },
-      error: () => {
-        // Sécurité supplémentaire
+      error: (err) => {
         if (reqId !== this.guidesRequestSeq) return
-        this.loadingGuides = false
+
+        this.uiUpdate(() => {
+          this.errorMessage = err?.error?.message ?? 'Impossible de charger les guides.'
+          this.loadingGuides = false
+        })
       }
     })
 }
@@ -617,21 +627,19 @@ refreshGuidesList(): void {
   loadUsers(): void {
   const reqId = ++this.usersRequestSeq
 
-  this.loadingUsers = true
+  this.uiUpdate(() => {
+    this.loadingUsers = true
+  })
 
   this.adminUsersService.getUsers()
     .pipe(
       take(1),
       timeout(10000),
-      catchError((err) => {
-        if (reqId === this.usersRequestSeq) {
-          this.errorMessage = err?.error?.message ?? 'Impossible de charger les users.'
-        }
-        return of([])
-      }),
       finalize(() => {
         if (reqId === this.usersRequestSeq) {
-          this.loadingUsers = false
+          this.uiUpdate(() => {
+            this.loadingUsers = false
+          })
         }
       })
     )
@@ -647,12 +655,17 @@ refreshGuidesList(): void {
           ? result.items
           : []
 
-        this.allUsers = [...users.filter((u: AdminUser) => u.role === 'User')]
-        this.loadingUsers = false
+        this.uiUpdate(() => {
+          this.allUsers = [...users.filter((u: AdminUser) => u.role === 'User')]
+        })
       },
-      error: () => {
+      error: (err) => {
         if (reqId !== this.usersRequestSeq) return
-        this.loadingUsers = false
+
+        this.uiUpdate(() => {
+          this.errorMessage = err?.error?.message ?? 'Impossible de charger les users.'
+          this.loadingUsers = false
+        })
       }
     })
 }
@@ -718,22 +731,28 @@ refreshGuidesList(): void {
   }
 
   editGuide(id: number): void {
-    const reqId = ++this.guideDetailRequestSeq
+  const reqId = ++this.editGuideRequestSeq
 
-    this.loadingGuideDetailId = id
-    this.errorMessage = ''
-    this.message = ''
+  this.loadingGuideDetailId = id
+  this.errorMessage = ''
+  this.message = ''
 
-    this.adminGuidesService.getGuideById(id)
-      .pipe(finalize(() => {
-        if (reqId === this.guideDetailRequestSeq) {
-          this.loadingGuideDetailId = null
+  this.adminGuidesService.getGuideById(id)
+    .pipe(
+      take(1),
+      finalize(() => {
+        if (reqId === this.editGuideRequestSeq) {
+          this.uiUpdate(() => {
+            this.loadingGuideDetailId = null
+          })
         }
-      }))
-      .subscribe({
-        next: (guide) => {
-          if (reqId !== this.guideDetailRequestSeq) return
+      })
+    )
+    .subscribe({
+      next: (guide) => {
+        if (reqId !== this.editGuideRequestSeq) return
 
+        this.uiUpdate(() => {
           this.guideForm = {
             id: guide.id,
             title: guide.title ?? '',
@@ -745,20 +764,24 @@ refreshGuidesList(): void {
             destination: guide.destination ?? '',
             coverImageUrl: guide.coverImageUrl ?? ''
           }
+        })
 
-          window.scrollTo({ top: 0, behavior: 'smooth' })
-        },
-        error: (err) => {
-          if (reqId !== this.guideDetailRequestSeq) return
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      },
+      error: (err) => {
+        if (reqId !== this.editGuideRequestSeq) return
 
+        this.uiUpdate(() => {
           this.errorMessage = err?.error?.message ?? 'Impossible de charger le guide.'
-        }
-      })
-  }
+        })
+      }
+    })
+}
 
   openGuideAdmin(id: number, scroll = true): void {
-    const reqId = ++this.guideDetailRequestSeq
+  const reqId = ++this.openGuideRequestSeq
 
+  this.uiUpdate(() => {
     this.loadingGuideDetailId = id
     this.errorMessage = ''
     this.message = ''
@@ -768,33 +791,49 @@ refreshGuidesList(): void {
     this.editingActivityId = null
     this.editingActivityDayId = null
     this.resetActivityForm()
+  })
 
-    this.adminGuidesService.getGuideById(id)
-      .pipe(finalize(() => {
-        if (reqId === this.guideDetailRequestSeq) {
-          this.loadingGuideDetailId = null
+  this.adminGuidesService.getGuideById(id)
+    .pipe(
+      take(1),
+      finalize(() => {
+        if (reqId === this.openGuideRequestSeq) {
+          this.uiUpdate(() => {
+            this.loadingGuideDetailId = null
+          })
         }
-      }))
-      .subscribe({
-        next: (guide) => {
-          if (reqId !== this.guideDetailRequestSeq) return
+      })
+    )
+    .subscribe({
+      next: (guide) => {
+        if (reqId !== this.openGuideRequestSeq) return
 
-          this.selectedGuideDetail = guide
+        this.uiUpdate(() => {
+          // clone pour garantir une nouvelle référence et déclencher l affichage
+          this.selectedGuideDetail = {
+            ...guide,
+            days: [...(guide.days ?? [])]
+          } as GuideDetail
 
           const invited = (guide.invitedUserIds ?? []) as number[]
           this.selectedGuideInvitedUserIds = new Set(invited)
+        })
 
-          if (scroll) {
+        if (scroll) {
+          setTimeout(() => {
             window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })
-          }
-        },
-        error: (err) => {
-          if (reqId !== this.guideDetailRequestSeq) return
-
-          this.errorMessage = err?.error?.message ?? 'Impossible de charger le détail du guide.'
+          }, 0)
         }
-      })
-  }
+      },
+      error: (err) => {
+        if (reqId !== this.openGuideRequestSeq) return
+
+        this.uiUpdate(() => {
+          this.errorMessage = err?.error?.message ?? 'Impossible de charger le détail du guide.'
+        })
+      }
+    })
+}
 
   deleteGuide(guide: Guide): void {
     this.errorMessage = ''
