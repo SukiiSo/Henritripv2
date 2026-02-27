@@ -1,0 +1,370 @@
+<section style="padding:16px; color:#eef3ff; background:#0f1a33; min-height:100vh;">
+  <h1 style="margin:0 0 8px;">Admin guides</h1>
+  <p style="margin:0 0 16px; color:#b8c6ea;">Gestion des guides, invitations, jours et activités.</p>
+
+  @if (message) {
+    <div style="margin-bottom:12px; padding:10px 12px; border-radius:10px; border:1px solid #23426a; background:#132644; color:#bcd7ff;">
+      {{ message }}
+    </div>
+  }
+
+  @if (errorMessage) {
+    <div style="margin-bottom:12px; padding:10px 12px; border-radius:10px; border:1px solid #6a2323; background:#351818; color:#ffcaca;">
+      {{ errorMessage }}
+    </div>
+  }
+
+  <!-- Formulaire guide -->
+  <div style="background:#1b2747; border:1px solid #243864; border-radius:14px; padding:14px; margin-bottom:16px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:12px;">
+      <h2 style="margin:0; font-size:1.05rem;">
+        {{ guideForm.id ? ('Modifier guide #' + guideForm.id) : 'Créer un guide' }}
+      </h2>
+      @if (guideForm.id) {
+        <button type="button" (click)="resetGuideForm()"
+          style="border-radius:10px; border:1px solid #344d7b; background:#172645; color:#e4ecff; padding:8px 12px; cursor:pointer;">
+          Nouveau guide
+        </button>
+      }
+    </div>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:10px;">
+      <div style="grid-column:1 / -1;">
+        <label style="display:block; margin-bottom:6px;">Titre</label>
+        <input [(ngModel)]="guideForm.title" type="text"
+          style="width:100%; border-radius:10px; border:1px solid #344d7b; background:#111c35; color:#eef3ff; padding:10px;" />
+      </div>
+
+      <div style="grid-column:1 / -1;">
+        <label style="display:block; margin-bottom:6px;">Description</label>
+        <textarea [(ngModel)]="guideForm.description" rows="3"
+          style="width:100%; border-radius:10px; border:1px solid #344d7b; background:#111c35; color:#eef3ff; padding:10px; resize:vertical;"></textarea>
+      </div>
+
+      <div>
+        <label style="display:block; margin-bottom:6px;">Nombre de jours</label>
+        <input [(ngModel)]="guideForm.numberOfDays" type="number" min="1"
+          style="width:100%; border-radius:10px; border:1px solid #344d7b; background:#111c35; color:#eef3ff; padding:10px;" />
+      </div>
+
+      <div>
+        <label style="display:block; margin-bottom:6px;">Mobilité</label>
+        <select [(ngModel)]="guideForm.mobility"
+          style="width:100%; border-radius:10px; border:1px solid #344d7b; background:#111c35; color:#eef3ff; padding:10px;">
+          @for (v of mobilityOptions; track v) { <option [value]="v">{{ v }}</option> }
+        </select>
+      </div>
+
+      <div>
+        <label style="display:block; margin-bottom:6px;">Saison</label>
+        <select [(ngModel)]="guideForm.season"
+          style="width:100%; border-radius:10px; border:1px solid #344d7b; background:#111c35; color:#eef3ff; padding:10px;">
+          @for (v of seasonOptions; track v) { <option [value]="v">{{ v }}</option> }
+        </select>
+      </div>
+
+      <div>
+        <label style="display:block; margin-bottom:6px;">Pour qui</label>
+        <select [(ngModel)]="guideForm.forWho"
+          style="width:100%; border-radius:10px; border:1px solid #344d7b; background:#111c35; color:#eef3ff; padding:10px;">
+          @for (v of forWhoOptions; track v) { <option [value]="v">{{ v }}</option> }
+        </select>
+      </div>
+
+      <div>
+        <label style="display:block; margin-bottom:6px;">Destination</label>
+        <input [(ngModel)]="guideForm.destination" type="text"
+          style="width:100%; border-radius:10px; border:1px solid #344d7b; background:#111c35; color:#eef3ff; padding:10px;" />
+      </div>
+
+      <div>
+        <label style="display:block; margin-bottom:6px;">Image URL</label>
+        <input [(ngModel)]="guideForm.coverImageUrl" type="text"
+          style="width:100%; border-radius:10px; border:1px solid #344d7b; background:#111c35; color:#eef3ff; padding:10px;" />
+      </div>
+    </div>
+
+    <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;">
+      <button type="button" (click)="submitGuideForm()" [disabled]="savingGuide"
+        style="border-radius:10px; border:1px solid #4b79d2; background:#2f62c9; color:white; padding:8px 12px; cursor:pointer;">
+        {{ savingGuide ? 'Enregistrement...' : (guideForm.id ? 'Mettre à jour' : 'Créer le guide') }}
+      </button>
+      <button type="button" (click)="resetGuideForm()"
+        style="border-radius:10px; border:1px solid #344d7b; background:#172645; color:#e4ecff; padding:8px 12px; cursor:pointer;">
+        Réinitialiser
+      </button>
+    </div>
+  </div>
+
+  <!-- Liste guides -->
+  <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:10px;">
+    <h2 style="margin:0; font-size:1.05rem;">Liste des guides</h2>
+    <div style="display:flex; gap:8px; align-items:center;">
+      <input [(ngModel)]="search" (keyup.enter)="refreshGuidesList()" placeholder="Recherche"
+        style="border-radius:10px; border:1px solid #344d7b; background:#111c35; color:#eef3ff; padding:8px 10px;" />
+      <button type="button" (click)="refreshGuidesList()"
+        style="border-radius:10px; border:1px solid #344d7b; background:#172645; color:#e4ecff; padding:8px 12px; cursor:pointer;">
+        {{ loadingGuides ? 'Chargement...' : 'Rafraîchir' }}
+      </button>
+    </div>
+  </div>
+
+  <div style="background:#1b2747; border:1px solid #243864; border-radius:14px; overflow:hidden; margin-bottom:16px;">
+    @if (loadingGuides) {
+      <div style="padding:14px;">Chargement...</div>
+    } @else if (guides.length === 0) {
+      <div style="padding:14px;">Aucun guide.</div>
+    } @else {
+      <table style="width:100%; border-collapse:collapse;">
+        <thead>
+          <tr style="background:#16223f;">
+            <th style="text-align:left; padding:10px; border-bottom:1px solid #263a65;">ID</th>
+            <th style="text-align:left; padding:10px; border-bottom:1px solid #263a65;">Titre</th>
+            <th style="text-align:left; padding:10px; border-bottom:1px solid #263a65;">Destination</th>
+            <th style="text-align:left; padding:10px; border-bottom:1px solid #263a65;">Jours</th>
+            <th style="text-align:left; padding:10px; border-bottom:1px solid #263a65;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (guide of guides; track guide.id) {
+            <tr style="border-bottom:1px solid #223357;">
+              <td style="padding:10px;">{{ guide.id }}</td>
+              <td style="padding:10px;">{{ guide.title }}</td>
+              <td style="padding:10px;">{{ guide.destination || '-' }}</td>
+              <td style="padding:10px;">{{ guide.daysCount || '-' }}</td>
+              <td style="padding:10px; display:flex; gap:8px; flex-wrap:wrap;">
+                <button type="button" (click)="openGuideAdmin(guide.id)" [disabled]="loadingGuideDetailId === guide.id"
+                  style="border-radius:10px; border:1px solid #345b7a; background:#1f3444; color:#d7efff; padding:6px 10px; cursor:pointer;">
+                  {{ loadingGuideDetailId === guide.id ? 'Chargement...' : 'Gérer' }}
+                </button>
+                <button type="button" (click)="editGuide(guide.id)" [disabled]="loadingGuideDetailId === guide.id"
+                  style="border-radius:10px; border:1px solid #345b7a; background:#1f3444; color:#d7efff; padding:6px 10px; cursor:pointer;">
+                  Éditer
+                </button>
+                <button type="button" (click)="deleteGuide(guide)" [disabled]="deletingGuideIds.has(guide.id)"
+                  style="border-radius:10px; border:1px solid #7a3434; background:#441f1f; color:#ffd6d6; padding:6px 10px; cursor:pointer;">
+                  {{ deletingGuideIds.has(guide.id) ? 'Suppression...' : 'Supprimer' }}
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+
+  <!-- Panneau gestion guide sélectionné -->
+  @if (selectedGuideDetail) {
+    <div style="background:#1b2747; border:1px solid #243864; border-radius:14px; padding:14px;">
+      <h2 style="margin:0 0 6px; font-size:1.05rem;">Gestion détaillée — {{ selectedGuideDetail.title }}</h2>
+      <p style="margin:0 0 16px; color:#b8c6ea;">Invitations users, jours et activités.</p>
+
+      <!-- Invitations -->
+      <div style="border:1px solid #263a65; border-radius:12px; padding:12px; margin-bottom:16px; background:#16223f;">
+        <h3 style="margin:0 0 10px; font-size:1rem;">Invitations users</h3>
+
+        @if (loadingUsers) {
+          <div style="color:#b8c6ea;">Chargement des users...</div>
+        } @else if (allUsers.length === 0) {
+          <div>Aucun user disponible.</div>
+        } @else {
+          <div style="display:grid; gap:8px;">
+            @for (user of allUsers; track user.id) {
+              <label style="display:flex; align-items:center; justify-content:space-between; gap:10px; border:1px solid #263a65; background:#121e39; border-radius:10px; padding:8px 10px;">
+                <span>
+                  {{ user.email }}
+                  <small style="color:#9fb2de;">({{ user.role }})</small>
+                </span>
+                <span style="display:flex; align-items:center; gap:8px;">
+                  <input type="checkbox" [checked]="isUserInvited(user.id)" [disabled]="invitationBusyUserIds.has(user.id)"
+                    (change)="toggleInvitation(user, $any($event.target).checked)" />
+                  @if (invitationBusyUserIds.has(user.id)) {
+                    <small style="color:#9fb2de;">...</small>
+                  }
+                </span>
+              </label>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Jours + activités -->
+      <div style="display:grid; gap:12px;">
+        @for (day of selectedGuideDetail.days; track day.id) {
+          <div style="border:1px solid #263a65; border-radius:12px; padding:12px; background:#16223f;">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
+              <div>
+                <strong>Jour {{ day.dayNumber }}</strong>
+                <span style="color:#b8c6ea;">, {{ day.title }}</span>
+                @if (day.date) { <span style="color:#9fb2de;">, {{ day.date }}</span> }
+              </div>
+              <button type="button" (click)="toggleDayEdit(day.id)"
+                style="border-radius:10px; border:1px solid #344d7b; background:#172645; color:#e4ecff; padding:6px 10px; cursor:pointer;">
+                {{ editingDayId === day.id ? 'Fermer' : 'Éditer le jour' }}
+              </button>
+            </div>
+
+            @if (editingDayId === day.id) {
+              <div style="border:1px solid #263a65; border-radius:10px; padding:10px; margin-bottom:12px; background:#101a31;">
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:10px;">
+                  <div>
+                    <label style="display:block; margin-bottom:6px;">Titre du jour</label>
+                    <input [(ngModel)]="dayEditForm.title" type="text"
+                      style="width:100%; border-radius:10px; border:1px solid #344d7b; background:#111c35; color:#eef3ff; padding:10px;" />
+                  </div>
+                  <div>
+                    <label style="display:block; margin-bottom:6px;">Date (yyyy-MM-dd)</label>
+                    <input [(ngModel)]="dayEditForm.date" type="text" placeholder="2025-09-01"
+                      style="width:100%; border-radius:10px; border:1px solid #344d7b; background:#111c35; color:#eef3ff; padding:10px;" />
+                  </div>
+                </div>
+                <div style="margin-top:10px;">
+                  <button type="button" (click)="saveDay(day)" [disabled]="savingDay"
+                    style="border-radius:10px; border:1px solid #4b79d2; background:#2f62c9; color:white; padding:8px 12px; cursor:pointer;">
+                    {{ savingDay ? 'Enregistrement...' : 'Sauvegarder le jour' }}
+                  </button>
+                </div>
+              </div>
+            }
+
+            <!-- Activités -->
+            <div style="margin-bottom:10px;">
+              <div style="font-weight:600; margin-bottom:8px;">Activités</div>
+
+              @if (!day.activities || day.activities.length === 0) {
+                <div style="color:#b8c6ea; margin-bottom:10px;">Aucune activité.</div>
+              }
+
+              @for (activity of day.activities; track activity.id) {
+                <div style="border:1px solid #25395f; background:#121e39; border-radius:10px; padding:10px; margin-bottom:8px;">
+                  <div style="display:flex; justify-content:space-between; gap:8px; align-items:flex-start; flex-wrap:wrap;">
+                    <div>
+                      <div><strong>#{{ activity.visitOrder }}</strong> {{ activity.title }}</div>
+                      <div style="color:#b8c6ea; font-size:0.92rem;">{{ activity.category }} · {{ activity.forWho }} · {{ activity.address }}</div>
+                      @if (activity.startTime || activity.endTime) {
+                        <div style="color:#9fb2de; font-size:0.9rem;">{{ activity.startTime || '-' }} à {{ activity.endTime || '-' }}</div>
+                      }
+                    </div>
+                    <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                      <button type="button" (click)="startEditActivity(day, activity)"
+                        style="border-radius:10px; border:1px solid #345b7a; background:#1f3444; color:#d7efff; padding:6px 10px; cursor:pointer;">
+                        Éditer
+                      </button>
+                      <button type="button" (click)="deleteActivity(day, activity)" [disabled]="deletingActivityIds.has(activity.id)"
+                        style="border-radius:10px; border:1px solid #7a3434; background:#441f1f; color:#ffd6d6; padding:6px 10px; cursor:pointer;">
+                        {{ deletingActivityIds.has(activity.id) ? 'Suppression...' : 'Supprimer' }}
+                      </button>
+                    </div>
+                  </div>
+
+                  @if (editingActivityId === activity.id) {
+                    <div style="margin-top:10px; border-top:1px solid #25395f; padding-top:10px;">
+                      <ng-container *ngTemplateOutlet="activityFormTpl; context: { day: day, mode: 'edit' }"></ng-container>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+
+            <!-- Ajouter activité -->
+            <div style="border-top:1px solid #25395f; padding-top:10px;">
+              <button type="button" (click)="toggleAddActivity(day.id)"
+                style="border-radius:10px; border:1px solid #344d7b; background:#172645; color:#e4ecff; padding:6px 10px; cursor:pointer;">
+                {{ addingActivityDayId === day.id ? 'Fermer ajout activité' : 'Ajouter une activité' }}
+              </button>
+
+              @if (addingActivityDayId === day.id) {
+                <div style="margin-top:10px;">
+                  <ng-container *ngTemplateOutlet="activityFormTpl; context: { day: day, mode: 'create' }"></ng-container>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+      <ng-template #activityFormTpl let-day="day" let-mode="mode">
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:10px;">
+          <div style="grid-column:1 / -1;">
+            <label style="display:block; margin-bottom:6px;">Titre</label>
+            <input [(ngModel)]="activityForm.title" type="text"
+              style="width:100%; border-radius:10px; border:1px solid #344d7b; background:#111c35; color:#eef3ff; padding:10px;" />
+          </div>
+          <div style="grid-column:1 / -1;">
+            <label style="display:block; margin-bottom:6px;">Description</label>
+            <textarea [(ngModel)]="activityForm.description" rows="2"
+              style="width:100%; border-radius:10px; border:1px solid #344d7b; background:#111c35; color:#eef3ff; padding:10px; resize:vertical;"></textarea>
+          </div>
+          <div>
+            <label style="display:block; margin-bottom:6px;">Catégorie</label>
+            <select [(ngModel)]="activityForm.category"
+              style="width:100%; border-radius:10px; border:1px solid #344d7b; background:#111c35; color:#eef3ff; padding:10px;">
+              @for (c of categoryOptions; track c) { <option [value]="c">{{ c }}</option> }
+            </select>
+          </div>
+          <div>
+            <label style="display:block; margin-bottom:6px;">Pour qui</label>
+            <select [(ngModel)]="activityForm.forWho"
+              style="width:100%; border-radius:10px; border:1px solid #344d7b; background:#111c35; color:#eef3ff; padding:10px;">
+              @for (v of forWhoOptions; track v) { <option [value]="v">{{ v }}</option> }
+            </select>
+          </div>
+          <div>
+            <label style="display:block; margin-bottom:6px;">Ordre de visite</label>
+            <input [(ngModel)]="activityForm.visitOrder" type="number" min="1"
+              style="width:100%; border-radius:10px; border:1px solid #344d7b; background:#111c35; color:#eef3ff; padding:10px;" />
+          </div>
+          <div style="grid-column:1 / -1;">
+            <label style="display:block; margin-bottom:6px;">Adresse</label>
+            <input [(ngModel)]="activityForm.address" type="text"
+              style="width:100%; border-radius:10px; border:1px solid #344d7b; background:#111c35; color:#eef3ff; padding:10px;" />
+          </div>
+          <div>
+            <label style="display:block; margin-bottom:6px;">Téléphone</label>
+            <input [(ngModel)]="activityForm.phoneNumber" type="text"
+              style="width:100%; border-radius:10px; border:1px solid #344d7b; background:#111c35; color:#eef3ff; padding:10px;" />
+          </div>
+          <div>
+            <label style="display:block; margin-bottom:6px;">Horaires</label>
+            <input [(ngModel)]="activityForm.openingHours" type="text"
+              style="width:100%; border-radius:10px; border:1px solid #344d7b; background:#111c35; color:#eef3ff; padding:10px;" />
+          </div>
+          <div>
+            <label style="display:block; margin-bottom:6px;">Site web</label>
+            <input [(ngModel)]="activityForm.website" type="text"
+              style="width:100%; border-radius:10px; border:1px solid #344d7b; background:#111c35; color:#eef3ff; padding:10px;" />
+          </div>
+          <div>
+            <label style="display:block; margin-bottom:6px;">Heure début</label>
+            <input [(ngModel)]="activityForm.startTime" type="text" placeholder="09:00"
+              style="width:100%; border-radius:10px; border:1px solid #344d7b; background:#111c35; color:#eef3ff; padding:10px;" />
+          </div>
+          <div>
+            <label style="display:block; margin-bottom:6px;">Heure fin</label>
+            <input [(ngModel)]="activityForm.endTime" type="text" placeholder="10:30"
+              style="width:100%; border-radius:10px; border:1px solid #344d7b; background:#111c35; color:#eef3ff; padding:10px;" />
+          </div>
+        </div>
+
+        <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+          @if (mode === 'create') {
+            <button type="button" (click)="createActivity(day)" [disabled]="savingActivity"
+              style="border-radius:10px; border:1px solid #4b79d2; background:#2f62c9; color:white; padding:8px 12px; cursor:pointer;">
+              {{ savingActivity ? 'Ajout...' : 'Ajouter activité' }}
+            </button>
+          }
+          @if (mode === 'edit') {
+            <button type="button" (click)="saveActivity(day)" [disabled]="savingActivity"
+              style="border-radius:10px; border:1px solid #4b79d2; background:#2f62c9; color:white; padding:8px 12px; cursor:pointer;">
+              {{ savingActivity ? 'Enregistrement...' : 'Sauvegarder activité' }}
+            </button>
+          }
+          <button type="button" (click)="resetActivityForm()"
+            style="border-radius:10px; border:1px solid #344d7b; background:#172645; color:#e4ecff; padding:8px 12px; cursor:pointer;">
+            Réinitialiser
+          </button>
+        </div>
+      </ng-template>
+    </div>
+  }
+</section>

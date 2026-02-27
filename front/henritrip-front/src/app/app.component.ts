@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core'
 import { RouterOutlet, RouterLink, Router } from '@angular/router'
 import { CommonModule } from '@angular/common'
-import { AuthService } from './core/models/auth/auth.service'
+import { AuthService } from './core/auth/auth.service'
 
 @Component({
   selector: 'app-root',

@@ -1,5 +1,55 @@
 # HenriTrip FrontEnd, Consommation des guides
 
+## Démarrage rapide
+
+### Prérequis
+
+- [Node.js](https://nodejs.org) (v18+) + npm
+- [.NET SDK 8](https://dotnet.microsoft.com/download/dotnet/8.0)
+
+### Développement
+
+**Backend** (API sur http://localhost:5168 — Swagger sur http://localhost:5168/swagger) :
+
+```bash
+cd back/HenriTrip.Api
+dotnet run
+```
+
+**Frontend** (sur http://localhost:4200) :
+
+```bash
+cd front/henritrip-front
+npm install
+npm start
+```
+
+### Build
+
+**Backend** :
+
+```bash
+cd back/HenriTrip.Api
+dotnet build
+```
+
+**Frontend** :
+
+```bash
+cd front/henritrip-front
+npm run build
+```
+
+### Comptes de test
+
+| Rôle  | Email                      | Mot de passe |
+|-------|----------------------------|--------------|
+| Admin | admin@henritrip.test       | admin123     |
+| User  | alice@henritrip.test       | alice123     |
+| User  | bob@henritrip.test         | bob123       |
+
+---
+
 ## Contexte
 
 Ce projet répond à l’exercice FrontEnd, création d’une web app permettant aux utilisateurs de consulter les guides auxquels ils ont accès, puis de naviguer dans le détail de chaque guide, jours et activités.

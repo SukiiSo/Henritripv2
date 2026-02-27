@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms'
 import { Subject, debounceTime, distinctUntilChanged, timeout, finalize, takeUntil } from 'rxjs'
 
 import { Guide } from '../../../../app/core/models/guide.model'
-import { GuidesService } from '../../../../app/core/models/services/services'
+import { GuidesService } from '../../../../app/core/services/guides.service'
 
 @Component({
   selector: 'app-guide-list-page',

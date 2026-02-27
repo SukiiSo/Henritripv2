@@ -1,8 +1,7 @@
 import { Routes } from '@angular/router'
-import { authGuard } from './core/models/auth/auth.guard'
-import { adminGuard } from './core/models/auth/admin.guard'
-import { LoginPageComponent } from './core/models/auth/login-page.component'
-
+import { authGuard } from './core/auth/auth.guard'
+import { adminGuard } from './core/auth/admin.guard'
+import { LoginPageComponent } from '../features/auth/login-page/login-page.component'
 import { GuideListPageComponent } from '../features/guides/pages/guide-list-page/guide-list-page.component'
 import { GuideDetailPageComponent } from '../features/guides/pages/guide-detail-page/guide-detail-page.component'
 
@@ -30,25 +29,19 @@ export const routes: Routes = [
     path: 'admin',
     canActivate: [adminGuard],
     loadComponent: () =>
-      import('./core/models/auth/admin-home-page.component').then(
-        m => m.AdminHomePageComponent
-      )
+      import('../features/admin/home/admin-home-page.component').then(m => m.AdminHomePageComponent)
   },
   {
     path: 'admin/users',
     canActivate: [adminGuard],
     loadComponent: () =>
-      import('./core/models/auth/admin-users-page.component').then(
-        m => m.AdminUsersPageComponent
-      )
+      import('../features/admin/users/admin-users-page.component').then(m => m.AdminUsersPageComponent)
   },
   {
     path: 'admin/guides',
     canActivate: [adminGuard],
     loadComponent: () =>
-      import('./core/models/auth/admin-guides-page.component').then(
-        m => m.AdminGuidesPageComponent
-      )
+      import('../features/admin/guides/admin-guides-page.component').then(m => m.AdminGuidesPageComponent)
   },
   {
     path: '**',

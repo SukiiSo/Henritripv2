@@ -4,7 +4,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router'
 import { timeout, finalize } from 'rxjs'
 
 import { GuideDetail, GuideDay } from '../../../../app/core/models/guide.model'
-import { GuidesService } from '../../../../app/core/models/services/services'
+import { GuidesService } from '../../../../app/core/services/guides.service'
 
 @Component({
   selector: 'app-guide-detail-page',
