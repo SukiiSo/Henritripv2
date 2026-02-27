@@ -3,8 +3,9 @@ import {
   __commonJS,
   __require,
   __spreadProps,
-  __spreadValues
-} from "./chunk-6DU2HRTW.js";
+  __spreadValues,
+  __yieldStar
+} from "./chunk-YXHVU7DJ.js";
 
 // node_modules/ms/index.js
 var require_ms = __commonJS({
@@ -15506,7 +15507,7 @@ var require_utils = __commonJS({
     function getCharset(req) {
       try {
         return (contentType.parse(req).parameters.charset || "").toLowerCase();
-      } catch {
+      } catch (e) {
         return void 0;
       }
     }
@@ -20187,12 +20188,12 @@ var require_dist = __commonJS({
       const token = tokens[index];
       if (token.type === "group") {
         for (const seq of flatten(token.tokens, 0, init.slice())) {
-          yield* flatten(tokens, index + 1, seq);
+          yield* __yieldStar(flatten(tokens, index + 1, seq));
         }
       } else {
         init.push(token);
       }
-      yield* flatten(tokens, index + 1, init);
+      yield* __yieldStar(flatten(tokens, index + 1, init));
     }
     function toRegExpSource(tokens, delimiter, keys, originalPath) {
       let result = "";
