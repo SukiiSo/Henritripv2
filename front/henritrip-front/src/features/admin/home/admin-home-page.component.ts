@@ -5,6 +5,7 @@ import { RouterLink } from '@angular/router'
   selector: 'app-admin-home-page',
   standalone: true,
   imports: [RouterLink],
-  templateUrl: './admin-home-page.component.html'
+  templateUrl: './admin-home-page.component.html',
+  styleUrl: './admin-home-page.component.scss'
 })
 export class AdminHomePageComponent {}

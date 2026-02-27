@@ -8,7 +8,8 @@ import { AdminUsersService, AdminUser } from '../../../app/core/services/admin-u
   selector: 'app-admin-users-page',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './admin-users-page.component.html'
+  templateUrl: './admin-users-page.component.html',
+  styleUrl: './admin-users-page.component.scss'
 })
 export class AdminUsersPageComponent implements OnInit {
   private adminUsersService = inject(AdminUsersService)

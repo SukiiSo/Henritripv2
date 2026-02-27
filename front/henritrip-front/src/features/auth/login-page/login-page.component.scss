@@ -105,6 +105,12 @@ input:focus {
 .btn:disabled {
   opacity: 0.7;
   cursor: not-allowed;
+  transform: none;
+}
+
+.btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(88, 165, 255, 0.3);
 }
 
 .btn-primary {

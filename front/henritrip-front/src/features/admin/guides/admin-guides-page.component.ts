@@ -38,7 +38,8 @@ type ActivityForm = {
   selector: 'app-admin-guides-page',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './admin-guides-page.component.html'
+  templateUrl: './admin-guides-page.component.html',
+  styleUrl: './admin-guides-page.component.scss'
 })
 export class AdminGuidesPageComponent implements OnInit {
   private adminGuidesService = inject(AdminGuidesService)

@@ -6,20 +6,24 @@
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(21, 28, 43, 0.95);
+  background: rgba(21, 28, 43, 0.97);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border-bottom: 1px solid #273149;
   color: #eef3ff;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  padding: 10px 14px;
+  gap: 16px;
+  padding: 12px 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
 }
 
 .topbar-nav {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   flex-wrap: wrap;
+  align-items: center;
 }
 
 .topbar-nav a {
@@ -27,32 +31,78 @@
   text-decoration: none;
   border: 1px solid #313d59;
   background: #242e45;
-  border-radius: 10px;
-  padding: 6px 10px;
+  border-radius: 12px;
+  padding: 8px 14px;
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
+}
+
+.topbar-nav a:hover {
+  background: #28334d;
+  border-color: #4d618f;
+  color: #f0f5ff;
+  transform: translateY(-1px);
+}
+
+.topbar-nav a:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(88, 165, 255, 0.25);
 }
 
 .session {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   flex-wrap: wrap;
+}
+
+.session span:not(.badge) {
+  color: #b6bfd3;
+  font-size: 0.9rem;
 }
 
 .badge {
   border-radius: 999px;
-  padding: 4px 8px;
+  padding: 4px 10px;
   background: rgba(88, 165, 255, 0.12);
   border: 1px solid rgba(88, 165, 255, 0.25);
   color: #9cc7ff;
   font-weight: 600;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
 }
 
 .session button {
   border: 1px solid #3a445e;
   background: transparent;
   color: #dfe8ff;
-  border-radius: 10px;
-  padding: 6px 10px;
+  border-radius: 12px;
+  padding: 8px 14px;
   cursor: pointer;
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+}
+
+.session button:hover {
+  background: rgba(255, 86, 86, 0.1);
+  border-color: rgba(255, 110, 110, 0.35);
+  color: #ffb8b8;
+}
+
+.session button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255, 110, 110, 0.2);
+}
+
+@media (max-width: 640px) {
+  .topbar {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 10px 14px;
+  }
+
+  .session {
+    justify-content: space-between;
+  }
 }

@@ -1,0 +1,53 @@
+// Admin guides page - base layout and shared tokens
+:host {
+  display: block;
+  min-height: 100vh;
+  background: #0f1a33;
+  color: #eef3ff;
+}
+
+.admin-guides {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 24px 20px 32px;
+}
+
+.admin-guides h1 {
+  margin: 0 0 8px;
+  font-size: 1.35rem;
+}
+
+.admin-guides > p:first-of-type {
+  margin: 0 0 20px;
+  color: #b8c6ea;
+  font-size: 0.95rem;
+}
+
+// Amélioration focus et transitions sur les champs (surcharge des styles inline)
+.admin-guides input,
+.admin-guides select,
+.admin-guides textarea {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.admin-guides input:focus,
+.admin-guides select:focus,
+.admin-guides textarea:focus {
+  outline: none;
+  border-color: #58a5ff !important;
+  box-shadow: 0 0 0 3px rgba(88, 165, 255, 0.15);
+}
+
+.admin-guides button:not(:disabled) {
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.admin-guides button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+@media (max-width: 640px) {
+  .admin-guides {
+    padding: 16px 14px 24px;
+  }
+}

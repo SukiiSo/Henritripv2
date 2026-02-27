@@ -1,90 +1,77 @@
-<section style="padding:16px; color:#eef3ff; background:#0f1a33; min-height:100vh;">
-  <h1 style="margin:0 0 8px;">Admin users</h1>
-  <p style="margin:0 0 16px; color:#b8c6ea;">Créer, lister et supprimer les utilisateurs.</p>
+<section class="admin-users">
+  <h1>Admin users</h1>
+  <p class="subtitle">Créer, lister et supprimer les utilisateurs.</p>
 
   @if (message) {
-    <div style="margin-bottom:12px; padding:10px 12px; border-radius:10px; border:1px solid #23426a; background:#132644; color:#bcd7ff;">
-      {{ message }}
-    </div>
+    <div class="alert-success">{{ message }}</div>
   }
 
   @if (errorMessage) {
-    <div style="margin-bottom:12px; padding:10px 12px; border-radius:10px; border:1px solid #6a2323; background:#351818; color:#ffcaca;">
-      {{ errorMessage }}
-    </div>
+    <div class="alert-error">{{ errorMessage }}</div>
   }
 
-  <div style="background:#1b2747; border:1px solid #243864; border-radius:14px; padding:14px; margin-bottom:16px;">
-    <h2 style="margin:0 0 12px; font-size:1.05rem;">Créer un utilisateur</h2>
-
-    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:10px;">
-      <div>
-        <label style="display:block; margin-bottom:6px;">Email</label>
-        <input [(ngModel)]="form.email" type="email" placeholder="user@henritrip.test"
-          style="width:100%; border-radius:10px; border:1px solid #344d7b; background:#111c35; color:#eef3ff; padding:10px;" />
+  <div class="card">
+    <h2>Créer un utilisateur</h2>
+    <div class="form-grid">
+      <div class="field">
+        <label for="email">Email</label>
+        <input id="email" [(ngModel)]="form.email" type="email" placeholder="user@henritrip.test" />
       </div>
-
-      <div>
-        <label style="display:block; margin-bottom:6px;">Mot de passe</label>
-        <input [(ngModel)]="form.password" type="text" placeholder="motdepasse"
-          style="width:100%; border-radius:10px; border:1px solid #344d7b; background:#111c35; color:#eef3ff; padding:10px;" />
+      <div class="field">
+        <label for="password">Mot de passe</label>
+        <input id="password" [(ngModel)]="form.password" type="text" placeholder="motdepasse" />
       </div>
-
-      <div>
-        <label style="display:block; margin-bottom:6px;">Rôle</label>
-        <select [(ngModel)]="form.role"
-          style="width:100%; border-radius:10px; border:1px solid #344d7b; background:#111c35; color:#eef3ff; padding:10px;">
+      <div class="field">
+        <label for="role">Rôle</label>
+        <select id="role" [(ngModel)]="form.role">
           <option value="User">User</option>
           <option value="Admin">Admin</option>
         </select>
       </div>
     </div>
-
-    <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;">
-      <button type="button" (click)="createUser()" [disabled]="saving"
-        style="border-radius:10px; border:1px solid #4b79d2; background:#2f62c9; color:white; padding:8px 12px; cursor:pointer;">
+    <div class="form-actions">
+      <button type="button" class="btn btn-primary" (click)="createUser()" [disabled]="saving">
         {{ saving ? 'Création...' : 'Créer user' }}
       </button>
-
-      <button type="button" (click)="resetForm()"
-        style="border-radius:10px; border:1px solid #344d7b; background:#172645; color:#e4ecff; padding:8px 12px; cursor:pointer;">
-        Réinitialiser
-      </button>
+      <button type="button" class="btn btn-secondary" (click)="resetForm()">Réinitialiser</button>
     </div>
   </div>
 
-  <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:10px;">
-    <h2 style="margin:0; font-size:1.05rem;">Liste des users</h2>
-    <button type="button" (click)="loadUsers()"
-      style="border-radius:10px; border:1px solid #344d7b; background:#172645; color:#e4ecff; padding:8px 12px; cursor:pointer;">
+  <div class="list-header">
+    <h2>Liste des users</h2>
+    <button type="button" class="btn btn-secondary" (click)="loadUsers()">
       {{ loading ? 'Chargement...' : 'Rafraîchir' }}
     </button>
   </div>
 
-  <div style="background:#1b2747; border:1px solid #243864; border-radius:14px; overflow:hidden;">
+  <div class="table-card">
     @if (loading) {
-      <div style="padding:14px;">Chargement...</div>
+      <div class="state">Chargement...</div>
     } @else if (users.length === 0) {
-      <div style="padding:14px;">Aucun utilisateur.</div>
+      <div class="state">Aucun utilisateur.</div>
     } @else {
-      <table style="width:100%; border-collapse:collapse;">
+      <table>
         <thead>
-          <tr style="background:#16223f;">
-            <th style="text-align:left; padding:10px; border-bottom:1px solid #263a65;">ID</th>
-            <th style="text-align:left; padding:10px; border-bottom:1px solid #263a65;">Email</th>
-            <th style="text-align:left; padding:10px; border-bottom:1px solid #263a65;">Rôle</th>
-            <th style="text-align:left; padding:10px; border-bottom:1px solid #263a65;">Actions</th>
+          <tr>
+            <th>ID</th>
+            <th>Email</th>
+            <th>Rôle</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
           @for (user of users; track trackByUserId($index, user)) {
-            <tr style="border-bottom:1px solid #223357;">
-              <td style="padding:10px;">{{ user.id }}</td>
-              <td style="padding:10px;">{{ user.email }}</td>
-              <td style="padding:10px;">{{ user.role }}</td>
-              <td style="padding:10px;">
-                <button type="button" (click)="deleteUser(user)" [disabled]="deletingIds.has(user.id)"
-                  style="border-radius:10px; border:1px solid #7a3434; background:#441f1f; color:#ffd6d6; padding:6px 10px; cursor:pointer;">
+            <tr>
+              <td>{{ user.id }}</td>
+              <td>{{ user.email }}</td>
+              <td>{{ user.role }}</td>
+              <td>
+                <button
+                  type="button"
+                  class="btn btn-danger"
+                  (click)="deleteUser(user)"
+                  [disabled]="deletingIds.has(user.id)"
+                >
                   {{ deletingIds.has(user.id) ? 'Suppression...' : 'Supprimer' }}
                 </button>
               </td>
