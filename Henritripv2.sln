@@ -1,0 +1,29 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "back", "back", "{11BF4459-C332-B9BD-164A-F44681F2EC0B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HenriTrip.Api", "back\HenriTrip.Api\HenriTrip.Api.csproj", "{107F73AC-F853-32CF-EDA7-8D8F06B12954}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{107F73AC-F853-32CF-EDA7-8D8F06B12954}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{107F73AC-F853-32CF-EDA7-8D8F06B12954}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{107F73AC-F853-32CF-EDA7-8D8F06B12954}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{107F73AC-F853-32CF-EDA7-8D8F06B12954}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{107F73AC-F853-32CF-EDA7-8D8F06B12954} = {11BF4459-C332-B9BD-164A-F44681F2EC0B}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4B5041D0-FF78-4D74-B37C-E69EC03E7424}
+	EndGlobalSection
+EndGlobal
