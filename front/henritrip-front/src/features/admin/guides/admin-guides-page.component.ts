@@ -218,9 +218,17 @@ export class AdminGuidesPageComponent implements OnInit {
   editGuide(id: number): void {
     this.loadingGuideDetailId = id
     this.errorMessage = ''
+    this.cdr.markForCheck()
 
     this.adminGuidesService.getGuideById(id)
-      .pipe(take(1), finalize(() => { this.loadingGuideDetailId = null }))
+      .pipe(
+        take(1),
+        timeout(10000),
+        finalize(() => {
+          this.loadingGuideDetailId = null
+          this.cdr.markForCheck()
+        })
+      )
       .subscribe({
         next: (guide) => {
           this.guideForm = {
@@ -252,9 +260,17 @@ export class AdminGuidesPageComponent implements OnInit {
     this.editingActivityId = null
     this.editingActivityDayId = null
     this.resetActivityForm()
+    this.cdr.markForCheck()
 
     this.adminGuidesService.getGuideById(id)
-      .pipe(take(1), finalize(() => { this.loadingGuideDetailId = null }))
+      .pipe(
+        take(1),
+        timeout(10000),
+        finalize(() => {
+          this.loadingGuideDetailId = null
+          this.cdr.markForCheck()
+        })
+      )
       .subscribe({
         next: (guide) => {
           this.selectedGuideDetail = { ...guide, days: [...(guide.days ?? [])] } as GuideDetail

@@ -12,7 +12,7 @@ static class AuthEndpoints
                 u.Password == request.Password.Trim());
 
             if (user is null)
-                return Results.Unauthorized();
+                return Results.Json(new { message = "Identifiants invalides." }, statusCode: 401);
 
             var token = $"mock_{Guid.NewGuid():N}";
             sessions[token] = user.Id;

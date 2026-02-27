@@ -43,6 +43,16 @@ export class LoginPageComponent {
 
     if (this.form.invalid) {
       this.form.markAllAsTouched()
+      const emailCtrl = this.form.get('email')
+      const pwdCtrl = this.form.get('password')
+      if (emailCtrl?.hasError('required') || pwdCtrl?.hasError('required')) {
+        this.errorMessage = 'Email et mot de passe obligatoires.'
+      } else if (emailCtrl?.hasError('email')) {
+        this.errorMessage = 'Veuillez entrer une adresse email valide.'
+      } else {
+        this.errorMessage = 'Vérifiez les champs du formulaire.'
+      }
+      this.cdr.markForCheck()
       return
     }
 

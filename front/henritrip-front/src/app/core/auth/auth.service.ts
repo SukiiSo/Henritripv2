@@ -39,7 +39,14 @@ export class AuthService {
       }),
       map(() => ({ ok: true as const })),
       catchError((err) => {
-        const message = err?.status === 401 ? 'Identifiants invalides.' : 'Impossible de se connecter.'
+        const msg = err?.error?.message
+        const message = msg && typeof msg === 'string'
+          ? msg
+          : err?.status === 401
+            ? 'Identifiants invalides.'
+            : err?.status === 400
+              ? 'Email et mot de passe obligatoires.'
+              : 'Impossible de se connecter. Vérifiez votre connexion.'
         return of({ ok: false as const, message })
       })
     )

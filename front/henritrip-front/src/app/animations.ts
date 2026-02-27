@@ -98,16 +98,3 @@ export const alertFade = trigger('alertFade', [
     animate('0.2s ease', style({ opacity: 0, transform: 'translateY(-4px)' }))
   ])
 ])
-
-/** Combinaison pour page complète: host + contenu */
-export const pageAnimations = [pageFadeIn]
-
-export const slideDownAnimations = [slideDown]
-
-export const fadeUpAnimations = [fadeUp]
-
-export const topbarAnimations = [topbarSlide]
-
-export const alertAnimations = [alertFade]
-
-export const listStaggerAnimations = [listStagger]
