@@ -3,13 +3,15 @@ import { CommonModule } from '@angular/common'
 import { FormsModule } from '@angular/forms'
 import { finalize, take, timeout } from 'rxjs'
 import { AdminUsersService, AdminUser } from '../../../app/core/services/admin-users.service'
+import { pageFadeIn, slideDown, fadeUp, panelReveal, alertFade } from '../../../app/animations'
 
 @Component({
   selector: 'app-admin-users-page',
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './admin-users-page.component.html',
-  styleUrl: './admin-users-page.component.scss'
+  styleUrl: './admin-users-page.component.scss',
+  animations: [pageFadeIn, slideDown, fadeUp, panelReveal, alertFade]
 })
 export class AdminUsersPageComponent implements OnInit {
   private adminUsersService = inject(AdminUsersService)

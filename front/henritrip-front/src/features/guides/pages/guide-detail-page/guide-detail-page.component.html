@@ -1,19 +1,19 @@
-<section class="guide-detail-page">
- <a class="back-link" routerLink="/guides" aria-label="Retour aux guides">
+<section class="guide-detail-page" @pageFadeIn>
+ <a class="back-link" routerLink="/guides" aria-label="Retour aux guides" @slideDown>
   <span class="back-link-icon">←</span>
   <span>Retour aux guides</span>
 </a>
 <div class="detail-brand">
 
 </div>
-  <div *ngIf="loading" class="state">Chargement du guide...</div>
+  <div *ngIf="loading" class="state" @fadeUp>Chargement du guide...</div>
 
-  <div *ngIf="!loading && errorMessage" class="state error">
+  <div *ngIf="!loading && errorMessage" class="state error" @alertFade>
     {{ errorMessage }}
   </div>
 
   <ng-container *ngIf="!loading && guide as g">
-    <header class="hero">
+    <header class="hero" @fadeUp>
       <div class="hero-media" [class.placeholder]="!g.coverImageUrl">
         <img *ngIf="g.coverImageUrl" [src]="g.coverImageUrl" [alt]="g.title" />
         <span *ngIf="!g.coverImageUrl">Guide</span>
@@ -33,7 +33,7 @@
       </div>
     </header>
 
-   <section class="days-section" *ngIf="g.days.length; else noDays">
+   <section class="days-section" *ngIf="g.days.length; else noDays" @panelReveal>
       <h2>Jours du guide</h2>
 
       <div class="days-tabs">
@@ -61,6 +61,7 @@
           <article
             class="activity-card"
             *ngFor="let activity of day.activities; trackBy: trackByActivityId"
+            @cardIn
           >
             <div class="activity-order">{{ activity.visitOrder }}</div>
 

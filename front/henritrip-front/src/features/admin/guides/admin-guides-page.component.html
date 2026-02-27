@@ -1,21 +1,21 @@
-<section class="admin-guides">
-  <h1>Admin guides</h1>
-  <p>Gestion des guides, invitations, jours et activités.</p>
+<section class="admin-guides" @pageFadeIn>
+  <h1 @slideDown>Admin guides</h1>
+  <p @slideDown>Gestion des guides, invitations, jours et activités.</p>
 
   @if (message) {
-    <div style="margin-bottom:12px; padding:10px 12px; border-radius:10px; border:1px solid #23426a; background:#132644; color:#bcd7ff;">
+    <div style="margin-bottom:12px; padding:10px 12px; border-radius:10px; border:1px solid #23426a; background:#132644; color:#bcd7ff;" @alertFade>
       {{ message }}
     </div>
   }
 
   @if (errorMessage) {
-    <div style="margin-bottom:12px; padding:10px 12px; border-radius:10px; border:1px solid #6a2323; background:#351818; color:#ffcaca;">
+    <div style="margin-bottom:12px; padding:10px 12px; border-radius:10px; border:1px solid #6a2323; background:#351818; color:#ffcaca;" @alertFade>
       {{ errorMessage }}
     </div>
   }
 
   <!-- Formulaire guide -->
-  <div style="background:#1b2747; border:1px solid #243864; border-radius:14px; padding:14px; margin-bottom:16px;">
+  <div style="background:#1b2747; border:1px solid #243864; border-radius:14px; padding:14px; margin-bottom:16px;" @panelReveal>
     <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:12px;">
       <h2 style="margin:0; font-size:1.05rem;">
         {{ guideForm.id ? ('Modifier guide #' + guideForm.id) : 'Créer un guide' }}
@@ -109,11 +109,11 @@
     </div>
   </div>
 
-  <div style="background:#1b2747; border:1px solid #243864; border-radius:14px; overflow:hidden; margin-bottom:16px;">
+  <div style="background:#1b2747; border:1px solid #243864; border-radius:14px; overflow:hidden; margin-bottom:16px;" @fadeUp>
     @if (loadingGuides) {
-      <div style="padding:14px;">Chargement...</div>
+      <div style="padding:14px;" @fadeUp>Chargement...</div>
     } @else if (guides.length === 0) {
-      <div style="padding:14px;">Aucun guide.</div>
+      <div style="padding:14px;" @fadeUp>Aucun guide.</div>
     } @else {
       <table style="width:100%; border-collapse:collapse;">
         <thead>

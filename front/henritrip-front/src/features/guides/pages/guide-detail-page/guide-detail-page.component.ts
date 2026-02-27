@@ -5,13 +5,15 @@ import { timeout, finalize } from 'rxjs'
 
 import { GuideDetail, GuideDay } from '../../../../app/core/models/guide.model'
 import { GuidesService } from '../../../../app/core/services/guides.service'
+import { pageFadeIn, fadeUp, slideDown, panelReveal, cardIn, alertFade } from '../../../../app/animations'
 
 @Component({
   selector: 'app-guide-detail-page',
   standalone: true,
   imports: [CommonModule, RouterLink],
   templateUrl: './guide-detail-page.component.html',
-  styleUrl: './guide-detail-page.component.scss'
+  styleUrl: './guide-detail-page.component.scss',
+  animations: [pageFadeIn, fadeUp, slideDown, panelReveal, cardIn, alertFade]
 })
 export class GuideDetailPageComponent implements OnInit {
   private route = inject(ActivatedRoute)

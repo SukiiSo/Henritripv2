@@ -23,6 +23,12 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     }
   }
 
+  // Ne pas intercepter les erreurs sur /auth/login : le composant login gère l'affichage du message
+  const isLoginRequest = req.url.includes('/auth/login')
+  if (isLoginRequest) {
+    return next(requestToSend)
+  }
+
   return next(requestToSend).pipe(
     catchError(err => {
       if (err?.status === 401 && !router.url.startsWith('/login')) {

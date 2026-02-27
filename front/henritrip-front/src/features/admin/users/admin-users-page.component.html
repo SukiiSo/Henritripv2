@@ -1,16 +1,16 @@
-<section class="admin-users">
-  <h1>Admin users</h1>
-  <p class="subtitle">Créer, lister et supprimer les utilisateurs.</p>
+<section class="admin-users" @pageFadeIn>
+  <h1 @slideDown>Admin users</h1>
+  <p class="subtitle" @slideDown>Créer, lister et supprimer les utilisateurs.</p>
 
   @if (message) {
-    <div class="alert-success">{{ message }}</div>
+    <div class="alert-success" @alertFade>{{ message }}</div>
   }
 
   @if (errorMessage) {
-    <div class="alert-error">{{ errorMessage }}</div>
+    <div class="alert-error" @alertFade>{{ errorMessage }}</div>
   }
 
-  <div class="card">
+  <div class="card" @panelReveal>
     <h2>Créer un utilisateur</h2>
     <div class="form-grid">
       <div class="field">
@@ -44,11 +44,11 @@
     </button>
   </div>
 
-  <div class="table-card">
+  <div class="table-card" @fadeUp>
     @if (loading) {
-      <div class="state">Chargement...</div>
+      <div class="state" @fadeUp>Chargement...</div>
     } @else if (users.length === 0) {
-      <div class="state">Aucun utilisateur.</div>
+      <div class="state" @fadeUp>Aucun utilisateur.</div>
     } @else {
       <table>
         <thead>

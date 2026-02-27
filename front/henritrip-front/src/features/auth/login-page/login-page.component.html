@@ -1,5 +1,5 @@
-<div class="login-page">
-  <div class="login-card">
+<div class="login-page" @pageFadeIn>
+  <div class="login-card" @slideDown>
     <div class="brand">
       <img class="brand-logo" src="assets/logo.png" alt="HenriTrip" onerror="this.style.display='none'" />
       <div>
@@ -19,7 +19,7 @@
         <input id="password" type="password" formControlName="password" placeholder="••••••••" />
       </div>
 
-      <div class="error" *ngIf="errorMessage">
+      <div class="error" *ngIf="errorMessage" @alertFade>
         {{ errorMessage }}
       </div>
 

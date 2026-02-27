@@ -6,6 +6,7 @@ import { finalize, take, timeout } from 'rxjs'
 import { Guide, GuideDetail, GuideDay, GuideActivity } from '../../../app/core/models/guide.model'
 import { AdminGuidesService, CreateActivityRequest } from '../../../app/core/services/admin-guides.service'
 import { AdminUsersService, AdminUser } from '../../../app/core/services/admin-users.service'
+import { pageFadeIn, slideDown, fadeUp, panelReveal, alertFade } from '../../../app/animations'
 
 type GuideForm = {
   id: number | null
@@ -39,7 +40,8 @@ type ActivityForm = {
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './admin-guides-page.component.html',
-  styleUrl: './admin-guides-page.component.scss'
+  styleUrl: './admin-guides-page.component.scss',
+  animations: [pageFadeIn, slideDown, fadeUp, panelReveal, alertFade]
 })
 export class AdminGuidesPageComponent implements OnInit {
   private adminGuidesService = inject(AdminGuidesService)

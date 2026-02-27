@@ -6,13 +6,15 @@ import { Subject, debounceTime, distinctUntilChanged, timeout, finalize, takeUnt
 
 import { Guide } from '../../../../app/core/models/guide.model'
 import { GuidesService } from '../../../../app/core/services/guides.service'
+import { pageFadeIn, slideDown, panelReveal, fadeUp, listStagger, alertFade } from '../../../../app/animations'
 
 @Component({
   selector: 'app-guide-list-page',
   standalone: true,
   imports: [CommonModule, RouterLink, FormsModule],
   templateUrl: './guide-list-page.component.html',
-  styleUrl: './guide-list-page.component.scss'
+  styleUrl: './guide-list-page.component.scss',
+  animations: [pageFadeIn, slideDown, panelReveal, fadeUp, listStagger, alertFade]
 })
 export class GuideListPageComponent implements OnInit, OnDestroy {
   private guidesService = inject(GuidesService)

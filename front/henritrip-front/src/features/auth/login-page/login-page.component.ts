@@ -1,20 +1,23 @@
-import { Component, inject } from '@angular/core'
+import { Component, inject, ChangeDetectorRef } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms'
 import { Router } from '@angular/router'
 import { AuthService } from '../../../app/core/auth/auth.service'
+import { pageFadeIn, slideDown, alertFade } from '../../../app/animations'
 
 @Component({
   selector: 'app-login-page',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './login-page.component.html',
-  styleUrl: './login-page.component.scss'
+  styleUrl: './login-page.component.scss',
+  animations: [pageFadeIn, slideDown, alertFade]
 })
 export class LoginPageComponent {
   private fb = inject(FormBuilder)
   private auth = inject(AuthService)
   private router = inject(Router)
+  private cdr = inject(ChangeDetectorRef)
 
   errorMessage = ''
   loading = false
@@ -48,15 +51,21 @@ export class LoginPageComponent {
 
     this.loading = true
 
-    this.auth.login(email, password).subscribe(result => {
-      this.loading = false
-
-      if (!result.ok) {
-        this.errorMessage = result.message
-        return
+    this.auth.login(email, password).subscribe({
+      next: (result) => {
+        this.loading = false
+        if (!result.ok) {
+          this.errorMessage = result.message
+          this.cdr.markForCheck()
+          return
+        }
+        this.router.navigateByUrl(this.auth.isAdmin() ? '/admin' : '/guides')
+      },
+      error: () => {
+        this.loading = false
+        this.errorMessage = 'Une erreur est survenue. Vérifiez que l\'API est démarrée.'
+        this.cdr.markForCheck()
       }
-
-      this.router.navigateByUrl(this.auth.isAdmin() ? '/admin' : '/guides')
     })
   }
 }

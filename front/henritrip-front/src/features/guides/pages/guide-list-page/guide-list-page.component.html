@@ -1,5 +1,5 @@
-<section class="page">
-  <header class="page-header">
+<section class="page" @pageFadeIn>
+  <header class="page-header" @slideDown>
     <div class="header-brand">
       <img src="/logo.png" alt="Henri Trip" class="brand-logo" />
       <div class="brand-text">
@@ -45,7 +45,7 @@
     </button>
   </div>
 
-  <section *ngIf="showFilters" class="filters-panel">
+  <section *ngIf="showFilters" class="filters-panel" @panelReveal>
     <div class="filter-grid">
       <div class="filter-field">
         <label for="seasonFilter">Saison</label>
@@ -111,21 +111,21 @@
     </div>
   </section>
 
-  <div *ngIf="isOffline" class="state error">
+  <div *ngIf="isOffline" class="state error" @alertFade>
     Mode hors ligne. Synchronisation automatique au retour de la connexion.
   </div>
 
-  <div *ngIf="loading" class="state">Chargement des guides...</div>
+  <div *ngIf="loading" class="state" @fadeUp>Chargement des guides...</div>
 
-  <div *ngIf="!loading && errorMessage" class="state error">
+  <div *ngIf="!loading && errorMessage" class="state error" @alertFade>
     {{ errorMessage }}
   </div>
 
-  <div *ngIf="!loading && !errorMessage && !filteredGuides.length" class="state">
+  <div *ngIf="!loading && !errorMessage && !filteredGuides.length" class="state" @fadeUp>
     Aucun guide trouvé.
   </div>
 
-  <div *ngIf="!loading && filteredGuides.length" class="grid">
+  <div *ngIf="!loading && filteredGuides.length" class="grid" @listStagger>
     <a
       class="card"
       *ngFor="let guide of filteredGuides; trackBy: trackByGuideId"

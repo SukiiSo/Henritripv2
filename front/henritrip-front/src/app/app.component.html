@@ -1,4 +1,4 @@
-<header class="topbar" *ngIf="auth.isLoggedIn()">
+<header class="topbar" *ngIf="auth.isLoggedIn()" @topbarSlide>
   <nav class="topbar-nav">
     <a routerLink="/guides">Guides</a>
     <a *ngIf="auth.isAdmin()" routerLink="/admin">Admin</a>
